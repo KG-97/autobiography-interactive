@@ -1,0 +1,13 @@
+{
+  "name": "interactive-autobiography",
+  "version": "1.0.0",
+  "description": "Interactive autobiography site with packaging scripts",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "node scripts/deploy.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
