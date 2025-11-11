@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import story from '../data/story.json' with { type: 'json' };
+import story from '../data/story.json' assert { type: 'json' };
 
 test('story profile includes prompts and focus areas', () => {
   assert.ok(story.profile.name, 'Profile should include a name');
