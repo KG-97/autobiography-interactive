@@ -1,0 +1,97 @@
+{
+  "profile": {
+    "name": "Jordan Rivers",
+    "tagline": "Designing interactive storytelling systems that travel across every platform.",
+    "stats": [
+      { "label": "Years shipping experiences", "value": 12 },
+      { "label": "Major releases", "value": 28 },
+      { "label": "Communities impacted", "value": "1.2M" }
+    ],
+    "summary": "Curious, human-centered technologist crafting narrative-driven products for web, conversational AI, and live events.",
+    "focus": [
+      "Designing adaptive story flows for Gemini",
+      "Expanding Railway deployment automations",
+      "Hosting an open archive for public readers"
+    ],
+    "prompts": [
+      "How did today's experiment change the way you tell this story?",
+      "What would a first-time visitor remember from this chapter?",
+      "Which collaborator helped illuminate the theme today?"
+    ]
+  },
+  "timeline": [
+    {
+      "year": 2014,
+      "title": "First interactive memoir prototype",
+      "category": "exploration",
+      "description": "Sketched a branching narrative using index cards and short audio clips. Learned how nonlinear storytelling opens empathy.",
+      "tags": ["prototype", "story structure"]
+    },
+    {
+      "year": 2017,
+      "title": "Open-sourced interactive timeline",
+      "category": "community",
+      "description": "Released a toolkit for crafting personal history websites. Collaborated with volunteers to translate it into five languages.",
+      "tags": ["open source", "localization", "community"]
+    },
+    {
+      "year": 2019,
+      "title": "Railway deployment pipeline",
+      "category": "platform",
+      "description": "Automated environment provisioning, preview URLs, and scheduled backups so storytellers can focus on craft, not infrastructure.",
+      "tags": ["devops", "automation"]
+    },
+    {
+      "year": 2021,
+      "title": "Gemini narrative experiments",
+      "category": "research",
+      "description": "Worked with multimodal prompts, dynamic tone adjustments, and voice staging to build living autobiographies with Gemini.",
+      "tags": ["ai", "experimentation"]
+    },
+    {
+      "year": 2023,
+      "title": "Public launch of interactive autobiography",
+      "category": "launch",
+      "description": "Unified the Gemini conversational experience with a polished web destination and Railway-backed automation.",
+      "tags": ["launch", "product design"]
+    }
+  ],
+  "achievements": [
+    {
+      "title": "Storyworld festival keynote",
+      "description": "Shared lessons on bringing machine learning empathy into autobiographical design.",
+      "mediaColor": "linear-gradient(135deg, #0ea5e9, #9333ea)",
+      "details": [
+        "Built a live demo that reacted to audience prompts",
+        "Published resources for educators and community leaders",
+        "Raised funding for an inclusive story lab"
+      ]
+    },
+    {
+      "title": "Railway automation suite",
+      "description": "Packaged infrastructure tooling so smaller teams could host narratives with confidence.",
+      "mediaColor": "linear-gradient(135deg, #22d3ee, #2563eb)",
+      "details": [
+        "Provisioned safe staging and production parity",
+        "Scripted one-click rollbacks",
+        "Documented incident playbooks with lived examples"
+      ]
+    },
+    {
+      "title": "Community story fellowship",
+      "description": "Mentored eight creators to publish interactive autobiographies in their own languages.",
+      "mediaColor": "linear-gradient(135deg, #f97316, #facc15)",
+      "details": [
+        "Established translation and accessibility reviews",
+        "Held weekly critique sessions with global guests",
+        "Launched shared asset libraries for reuse"
+      ]
+    }
+  ],
+  "skills": [
+    { "name": "Narrative systems", "level": "Expert", "progress": 0.92 },
+    { "name": "Human-centered research", "level": "Advanced", "progress": 0.83 },
+    { "name": "Platform automation", "level": "Advanced", "progress": 0.8 },
+    { "name": "Visual storytelling", "level": "Proficient", "progress": 0.72 }
+  ]
+}

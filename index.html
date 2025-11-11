@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Autobiography</title>
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="hero" id="top">
+      <div class="hero__overlay"></div>
+      <div class="hero__content">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-toggle__icon" aria-hidden="true">🌓</span>
+        </button>
+        <p class="hero__eyebrow">Interactive Autobiography</p>
+        <h1 class="hero__title"></h1>
+        <p class="hero__subtitle"></p>
+        <div class="hero__stats" aria-live="polite"></div>
+        <div class="hero__cta">
+          <a class="button" href="#timeline">Explore the journey</a>
+          <a class="button button--ghost" href="#achievements">Celebrate wins</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section" id="narrative">
+        <div class="section__header">
+          <h2>Living narrative</h2>
+          <p>Shape each chapter with interactive prompts and reflection tools.</p>
+        </div>
+        <div class="narrative">
+          <article class="narrative__card">
+            <h3>Core themes</h3>
+            <p class="narrative__summary"></p>
+          </article>
+          <article class="narrative__card">
+            <h3>Current focus</h3>
+            <ul class="narrative__focus"></ul>
+          </article>
+          <article class="narrative__card narrative__card--prompt">
+            <h3>Daily prompt</h3>
+            <p class="narrative__prompt"></p>
+            <button class="button narrative__shuffle">Shuffle prompt</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="timeline">
+        <div class="section__header">
+          <h2>Timeline</h2>
+          <p>Filter by chapter to watch the journey unfold.</p>
+        </div>
+        <div class="timeline__controls" role="toolbar" aria-label="Timeline filters">
+          <button class="chip chip--active" data-filter="all">All</button>
+        </div>
+        <div class="timeline" role="list"></div>
+      </section>
+
+      <section class="section" id="achievements">
+        <div class="section__header">
+          <h2>Celebrated moments</h2>
+          <p>Each milestone includes context, media, and reflection prompts.</p>
+        </div>
+        <div class="achievements" role="list"></div>
+      </section>
+
+      <section class="section" id="skills">
+        <div class="section__header">
+          <h2>Capabilities in motion</h2>
+          <p>Track growth areas and where they shine throughout the story.</p>
+        </div>
+        <div class="skills"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Built for storytelling across Gemini, Railway, and public web hosting.
+      </p>
+      <p>
+        <a href="#top">Back to top</a>
+      </p>
+    </footer>
+
+    <dialog class="modal" aria-modal="true">
+      <button class="modal__close" aria-label="Close">×</button>
+      <div class="modal__content"></div>
+    </dialog>
+
+    <script type="module" src="scripts/main.js"></script>
+  </body>
+</html>
