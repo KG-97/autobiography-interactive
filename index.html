@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kaleb Gates: The Reconstruction Protocol</title>
+  <!-- Tailwind with Typography plugin (so .prose works) -->
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f7f4;
+      color: #334155;
+    }
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 400px;
+      max-height: 50vh;
+    }
+    /* Smooth scroll for in-page anchors */
+    html { scroll-behavior: smooth; }
+    
+    /* Gemini Feature Styles */
+    .gemini-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: white;
+      background-color: #6366f1; /* Indigo 500 */
+      transition: background-color 0.2s;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .gemini-btn:hover {
+      background-color: #4f46e5; /* Indigo 600 */
+    }
+    .gemini-btn:disabled {
+      background-color: #a5b4fc; /* Indigo 300 */
+      cursor: not-allowed;
+    }
+    .gemini-output {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background-color: #f3f4f6; /* Gray 100 */
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: #374151; /* Gray 700 */
+      white-space: pre-wrap;
+      font-family: monospace;
+      min-height: 50px;
+      border: 1px solid #e5e7eb; /* Gray 200 */
+    }
+    .api-key-message {
+      background-color: #fffbeb; /* Yellow 50 */
+      border: 1px solid #fde68a; /* Yellow 300 */
+      color: #b45309; /* Amber 700 */
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+    .api-key-message code {
+      background-color: #fef3c7; /* Yellow 200 */
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="antialiased">
+  <!-- Safelist shim for Tailwind Play CDN to ensure dynamic classes render -->
+  <div class="hidden bg-pink-500 bg-red-500 bg-blue-500 bg-emerald-500 bg-sky-700 border-sky-700 text-sky-700 bg-purple-500 border-purple-500 text-purple-600"></div>
+
+  <a href="#overview" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white text-slate-800 px-3 py-2 rounded-md shadow">Skip to content</a>
+
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Primary">
+      <div class="flex justify-between items-center h-16">
+        <h1 class="text-xl font-bold text-slate-800">Kaleb Gates: Reconstruction Protocol</h1>
+        <div class="flex flex-wrap gap-2">
+          <a href="#overview" class="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors">V1: Overview</a>
+          <a href="#protocol" class="px-3 py-2 rounded-md text-sm font-medium text-teal-700 font-semibold hover:bg-slate-200 transition-colors">V2: Protocol</a>
+          <a href="#timeline" class="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors">V1: Timeline</a>
+          <a href="#lessons" class="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors">V1: Lessons</a>
+          <a href="#themes"  class="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors">Deep Dives</a>
+          <a href="#chapters" class="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors">Chapters</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- === VOL 1: OVERVIEW === -->
+    <section id="overview" class="mb-20">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-2">
+          <h2 class="text-3xl font-bold text-slate-900 mb-4">Volume 1: Executive Summary (Oct '24 - Oct '25)</h2>
+          <p class="text-base text-slate-700 leading-relaxed">
+            Over twelve months, I juggled full-time studies, a collapsing relationship, a housing dispute that escalated to a default judgment, my father's medical crises, and the stubborn launch of an AI project. The year began with a strained Christmas, slid into a January separation and lock change, and barreled into April's psychiatric admission and next-day arrest of my former partner. By June, I was defending against an outsized tenancy claim; by July, I was racing deadlines to set it aside. Amid the turbulence, I advanced my Biomedical Science studies at UWA, sat multiple exams, maintained income through hospitality work, and continued building a supplement-interaction app, SuppTracker.
+          </p>
+        </div>
+        <div class="bg-teal-600 text-white p-6 rounded-xl shadow-lg">
+          <h3 class="text-lg font-bold mb-2">V1 Prologue: Why I Kept Swinging</h3>
+          <p class="font-medium">
+            "I didn't fight because I'm brave. I fought because I hate bad math. A $27k default judgment built on vapor is bad math. If I rolled over, I'd be bankrolling someone else's fiction and teaching the universe that I'm negotiable. I'm not. Same with PHYL2002. When life ran on vibes and threats, ion channels still opened when they were told. In a year where meaning buckled, physiology was one room with gravity."
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- === VOL 2: RECONSTRUCTION PROTOCOL (GEMINI-ENABLED) === -->
+    <section id="protocol" class="mb-20 bg-slate-100 p-6 md:p-8 rounded-xl shadow-inner">
+      <h2 class="text-3xl font-bold text-slate-900 mb-2 text-center">Volume 2: The Reconstruction Protocol</h2>
+      <p class="text-center text-lg text-slate-700 mb-6">Integrating Academics (PHYL2002), Health Optimization, and Project Development (SuppTracker).</p>
+      
+      <!-- API Key Message -->
+      <div id="apiKeyMessage" class="api-key-message">
+        <strong>Note:</strong> To use the ✨ Gemini features, you must add your API key. Open this HTML file, find the line <code>const apiKey = ""</code> in the <code>&lt;script&gt;</code> tag at the bottom, and paste your key between the quotes.
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Card 1: Academic -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center mb-3">
+              <svg class="w-8 h-8 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+              <h3 class="text-xl font-bold text-slate-800">The Manual (PHYL2002)</h3>
+            </div>
+            <p id="academic-topic" class="text-sm font-medium text-blue-600 mb-2">CURRENT TOPIC: Neurophysiology, synaptic transmission, neurotransmitters (GABA, Glutamate), and receptor mechanics.</p>
+            <p class="text-slate-700 mb-4">Studying the core mechanics of the nervous system.</p>
+            <h4 class="font-semibold text-slate-800 mb-2">"Forensic Admin" Method:</h4>
+            <ul class="list-disc list-outside pl-5 text-sm text-slate-600 space-y-1">
+              <li>Build "Evidence Bundle" for exam.</li>
+              <li>**Claim:** Lecture Notes (GABA-A vs GABA-B).</li>
+              <li>**Evidence:** Textbook (Ch. 12) passages.</li>
+              <li>**Exhibit:** Lab results on nerve conduction.</li>
+              <li>**Affidavit:** One-page summary concept map.</li>
+            </ul>
+          </div>
+          <div>
+            <button id="btn-study-questions" class="gemini-btn">
+              ✨ Generate Study Questions
+            </button>
+            <div id="output-study-questions" class="gemini-output hidden"></div>
+          </div>
+        </div>
+
+        <!-- Card 2: Health -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-emerald-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center mb-3">
+              <svg class="w-8 h-8 text-emerald-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+              <h3 class="text-xl font-bold text-slate-800">The Test Case (Health)</h3>
+            </div>
+            <p class="text-sm font-medium text-emerald-600 mb-2">RELATED PROTOCOL: Stress &amp; Sleep</p>
+            <p class="text-slate-700 mb-4">Applying neurophysiology concepts to personal health optimization stack.</p>
+            <h4 class="font-semibold text-slate-800 mb-2">Current Stack:</h4>
+            <ul id="health-stack-list" class="list-disc list-outside pl-5 text-sm text-slate-600 space-y-1">
+              <li>**L-Theanine:** Cross-references with glutamate receptor modulation (AMPA).</li>
+              <li>**Magnesium:** Role as NMDA receptor antagonist.</li>
+              <li>**Ashwagandha:** Potential modulation of GABA-A receptors.</li>
+            </ul>
+            <p class="text-xs text-slate-500 mt-3"><i>"Treat self like a system with bottlenecks."</i></p>
+          </div>
+          <div>
+            <button id="btn-analyze-stack" class="gemini-btn">
+              ✨ Analyze Stack "Vibe"
+            </button>
+            <div id="output-analyze-stack" class="gemini-output hidden"></div>
+          </div>
+        </div>
+
+        <!-- Card 3: Project -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center mb-3">
+              <svg class="w-8 h-8 text-purple-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+              </svg>
+              <h3 class="text-xl font-bold text-slate-800">The Application (SuppTracker)</h3>
+            </div>
+            <p class="text-sm font-medium text-purple-600 mb-2">"PAYLOAD-FIRST" SPRINT</p>
+            <p class="text-slate-700 mb-4">Using the academic/health loop to define the next development task.</p>
+            <h4 class="font-semibold text-slate-800 mb-2">Next Task:</h4>
+            <ul id="project-task-list" class="list-disc list-outside pl-5 text-sm text-slate-600 space-y-1">
+              <li>**Goal:** Seed the database with the L-Theanine interaction profile.</li>
+              <li>**Data:** `L-Theanine -> Modulates -> Glutamate Receptors`.</li>
+              <li>**Guardrail:** Add citation from PHYL2002 textbook (Ch. 12).</li>
+              <li>**Output:** A testable API endpoint: `GET /api/v1/supplement/l-theanine/mechanisms`</li>
+            </ul>
+          </div>
+          <div>
+            <button id="btn-draft-payload" class="gemini-btn">
+              ✨ Draft DB Payload (JSON)
+            </button>
+            <pre id="output-draft-payload" class="gemini-output hidden"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- === V1: STRESS CHART === -->
+    <section id="stress-chart-section" class="mb-20">
+      <div class="bg-white p-6 rounded-xl shadow-xl">
+        <h3 class="text-xl font-bold text-slate-800 mb-2 text-center">Volume 1 Data</h3>
+        <h2 class="text-2xl font-bold text-slate-900 mb-2 text-center">A Year of Turbulence: Stress Index</h2>
+        <p class="text-center text-slate-600 mb-4">This chart visualizes the cumulative stress from personal, legal, academic, and family events from Oct 2024 to Oct 2025. Click any point for event details.</p>
+        <div class="chart-container">
+          <canvas id="stressChart" aria-label="Stress over time" role="img"></canvas>
+        </div>
+        <div id="chart-details" class="mt-4 p-4 bg-slate-100 rounded-lg text-center font-medium text-slate-700 min-h-[50px]">
+          Click a point on the chart to see details.
+        </div>
+      </div>
+    </section>
+
+    <!-- === V1: INTERACTIVE TIMELINE === -->
+    <section id="timeline" class="mb-20">
+      <h2 class="text-3xl font-bold text-slate-900 mb-6">Volume 1: Interactive Timeline</h2>
+
+      <div class="mb-6 flex flex-wrap gap-2 justify-center" id="timeline-filters" aria-label="Timeline filters">
+        <button class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 bg-teal-600 text-white shadow-lg" data-filter="All" aria-pressed="true">All Events</button>
+        <button class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 bg-white text-slate-700 hover:bg-slate-100" data-filter="Personal" aria-pressed="false">Personal &amp; Family</button>
+        <button class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 bg-white text-slate-700 hover:bg-slate-100" data-filter="Legal" aria-pressed="false">Legal</button>
+        <button class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 bg-white text-slate-700 hover:bg-slate-100" data-filter="Academic" aria-pressed="false">Academic</button>
+        <button class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 bg-white text-slate-700 hover:bg-slate-100" data-filter="Project" aria-pressed="false">Project</button>
+      </div>
+
+      <div class="max-w-3xl mx-auto">
+        <div id="timeline-container" aria-live="polite">
+          <!-- Timeline items injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- === V1: LESSONS LEARNED === -->
+    <section id="lessons" class="mb-20">
+      <h2 class="text-3xl font-bold text-slate-900 mb-6">Volume 1: Key Insights &amp; Lessons</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">Boundaries Aren't Punishment</h3>
+          <p class="text-slate-700">"I didn't change the lock to win. I changed it to stop losing. Compassion without a perimeter is just a buffet for chaos."</p>
+        </div>
+        <!-- ... other lesson cards ... -->
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">The Algorithm Ate My Girlfriend</h3>
+          <p class="text-slate-700">"She wanted revelation; I wanted rent paid and a kid enrolled in school. She believed she had kompromat. I had a spreadsheet. If you're looking for romance, don't date a feedback loop."</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">Anticipatory Grief With Homework</h3>
+          <p class="text-slate-700">"I said goodbye to my father five separate times and still sat the exam. I don't recommend the method. That was the day the relationship stopped being a relationship and became a risk surface."</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">Systems Don’t Shake Hands</h3>
+          <p class="text-slate-700">"Mental health let go; justice picked up. Same day. Same person. Watch a discharge letter and an arrest warrant pass each other in the hallway."</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">Why I Fought Instead of Folding</h3>
+          <p class="text-slate-700">"I could've declared bankruptcy and called it fate. But their numbers were theater—no invoices, no baselines, just vibes with a price tag. I don't tithe to incompetence."</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">Tech → Legal: Same Bug</h3>
+          <p class="text-slate-700">"SuppTracker shipped fine with an empty database. Looked legit. Did nothing. The landlord claim was the same: scaffolding solid, content missing."</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">Studying the HPA Axis While Living It</h3>
+          <p class="text-slate-700">"It's surreal to learn cortisol pathways while your own is set to continuous infusion. Lecture slide: 'chronic stress impairs executive function.' My notes: 'no kidding.'"</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">The Ethical Scaffolding</h3>
+          <p class="text-slate-700">"In health tech, 'move fast and break things' is a catastrophic philosophy. The most important feature isn't the UI; it's the guardrails."</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-[1.02]">
+          <h3 class="text-lg font-bold mb-2">Lessons I Paid For</h3>
+          <p class="text-slate-700">"Love needs fences. Courts respect paper, not pain. Hospitals are better at doors in than doors out. I'm not heroic. I'm stubborn with receipts."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- === THEMATIC DEEP DIVES (V1 & V2) === -->
+    <section id="themes" class="mb-20">
+      <h2 class="text-3xl font-bold text-slate-900 mb-6">Thematic Deep Dives (Vol 1 &amp; 2)</h2>
+      <p class="text-lg text-slate-700 mb-6 max-w-4xl">Select a tab to read the detailed story. Volume 1 (Teal) covers the 2024-2025 crisis. Volume 2 (Sky) covers the 2025+ reconstruction.</p>
+
+      <div class="border-b border-slate-300 mb-6">
+        <nav class="-mb-px flex flex-wrap space-x-4" id="tab-buttons" role="tablist" aria-label="Thematic tabs">
+          <!-- V1 Tabs -->
+          <button class="px-4 py-2 font-semibold rounded-t-lg bg-white text-teal-700 border-b-2 border-teal-700"
+                  data-tab="personal-v1" data-color="teal" role="tab" aria-selected="true" aria-controls="tab-personal-v1">Personal (V1)</button>
+          <button class="px-4 py-2 font-semibold text-slate-600 rounded-t-lg hover:bg-slate-100"
+                  data-tab="legal-v1" data-color="teal" role="tab" aria-selected="false" aria-controls="tab-legal-v1">Legal (V1)</button>
+          <button class="px-4 py-2 font-semibold text-slate-600 rounded-t-lg hover:bg-slate-100"
+                  data-tab="academic-v1" data-color="teal" role="tab" aria-selected="false" aria-controls="tab-academic-v1">Academic (V1)</button>
+          <button class="px-4 py-2 font-semibold text-slate-600 rounded-t-lg hover:bg-slate-100"
+                  data-tab="project-v1" data-color="teal" role="tab" aria-selected="false" aria-controls="tab-project-v1">Project (V1)</button>
+          
+          <!-- V2 Tabs -->
+          <button class="px-4 py-2 font-semibold text-slate-600 rounded-t-lg hover:bg-slate-100"
+                  data-tab="legal-v2" data-color="sky" role="tab" aria-selected="false" aria-controls="tab-legal-v2">Legal (V2)</button>
+          <button class="px-4 py-2 font-semibold text-slate-600 rounded-t-lg hover:bg-slate-100"
+                  data-tab="academic-v2" data-color="sky" role="tab" aria-selected="false" aria-controls="tab-academic-v2">Academic (V2)</button>
+          <button class="px-4 py-2 font-semibold text-slate-600 rounded-t-lg hover:bg-slate-100"
+                  data-tab="project-v2" data-color="sky" role="tab" aria-selected="false" aria-controls="tab-project-v2">Project (V2)</button>
+        </nav>
+      </div>
+
+      <div id="tab-content" class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+        <!-- V1 Panels -->
+        <div id="tab-personal-v1" class="prose prose-slate max-w-none" role="tabpanel">
+          <h3>V1: The Slow Unraveling &amp; Family Crisis</h3>
+          <p>The year began with a relationship already volatile. The Christmas trip to Geraldton crystallized this, with Alana spending ~16 hours a day on X (Twitter), contributing nothing, and disconnecting from reality. This detachment continued into January with mythic identities and messiah narratives.</p>
+          <p>By mid-January, it became a safety issue. After discovering she’d picked my bedroom lock, I installed a new lock and a camera. I wasn’t optimizing for harmony anymore; I was optimizing for not getting robbed in my sleep.</p>
+          <h4>The ICU Shock</h4>
+          <p>The day after a major confrontation, my father was rushed to ICU with sepsis. He spent a week on life support, elected palliative care, then stabilized. Alana showed zero empathy, and the relationship stopped being a support system and became a risk surface.</p>
+          <h4>Crisis Points</h4>
+          <p>On April 2, she was involuntarily admitted to a psychiatric ward—relief with a guilt tax. I provided clinicians with a detailed timeline. Hours after her April 22 discharge, she was arrested on a warrant and spent the night in the Northbridge Watch House.</p>
+        </div>
+
+        <div id="tab-legal-v1" class="hidden prose prose-slate max-w-none" role="tabpanel">
+          <h3>V1: Trial by Paperwork</h3>
+          <p>As the relationship unraveled, so did housing. Tensions escalated in early 2025. Recognizing the danger, I documented everything: photos, emails, dates. When talking failed, dates didn’t.</p>
+          <h4>The $27k Absent Judgment</h4>
+          <p>The landlords filed for ~$13,000. On the June 18 hearing date, a bank outage stranded me; the court entered a default judgment for <strong>$27,265.62</strong> in my absence.</p>
+          <p>I refused to fold. With 21 days to fight, I standardized my service address, compiled evidence, and filed a Form 16 affidavit on July 9: non-willful absence; no service of the inflated claim; exaggerated, invoice-free charges; and the landlords’ own RTA breach (s79) disposing of goods.</p>
+          <h4>The Hearing</h4>
+          <p>At the September set-aside hearing the magistrate stayed the judgment and adjourned for the landlords to produce actual invoices—the payload behind their scaffolding. In October I lodged summonses to compel production.</p>
+        </div>
+
+        <div id="tab-academic-v1" class="hidden prose prose-slate max-w-none" role="tabpanel">
+          <h3>V1: The Anchor of Gravity</h3>
+          <p>Biomedical Science at UWA was both pressure and anchor. When life ran on vibes and threats, ion channels still opened when told. I juggled PHYL1001, PHYL2002, and PSYC1101—studying for a February exam while my father was in ICU, writing labs in May while building legal evidence, and sitting finals days after the $27k hit.</p>
+          <h4>Living the Textbook</h4>
+          <p>Studying systems failing in real time was surreal. Slide: “chronic stress impairs executive function.” My notes: “no kidding.” Physiology became the counter-argument to chaos.</p>
+        </div>
+
+        <div id="tab-project-v1" class="hidden prose prose-slate max-w-none" role="tabpanel">
+          <h3>V1: Project: SuppTracker</h3>
+          <p>I kept coding an AI-driven supplement-interaction app: FastAPI, React, Docker. It was my project baby—a place where logic held when nothing else did.</p>
+          <h4>The Facepalm That Helped</h4>
+          <p>The app “worked,” but returned nothing. In July I found the stupid/holy bug: the database was empty. Metaphor unlocked—stop polishing the frame and load the content. Same pattern as the legal case: nice scaffolding, no payload.</p>
+          <h4>The Ethical Scaffolding</h4>
+          <p>Health tech can’t “move fast and break things.” Every entry needs citations; every output needs context. The most important feature is guardrails.</p>
+        </div>
+
+        <!-- V2 Panels -->
+        <div id="tab-legal-v2" class="hidden prose prose-slate max-w-none" role="tabpanel">
+          <h3>V2: Legal — The "Payload-First" Offensive</h3>
+          <p>The September set-aside hearing was a defensive victory; the magistrate stayed the $27k judgment. The strategy now shifts from defense to a "payload-first" offense. The magistrate adjourned for the landlords to produce invoices (the "payload") to justify their claims. They have not.</p>
+          <h4>Next Steps: Compel Production</h4>
+          <p>The V1 lesson was "Courts respect paper, not pain." The V2 application is to be the person with the most paper.</p>
+          <ol>
+            <li><strong>File Summons to Produce:</strong> Formally compel the production of all invoices, receipts, and condition reports the landlords intend to rely on. This isn't a request; it's a legal demand.</li>
+            <li><strong>Build "Evidence Bundle D (Refutation)":</strong> Create a new bundle that directly compares their (anticipated lack of) evidence against our "Bundle B (Condition/Evidence)." This frames the argument for the next hearing.</li>
+            <li><strong>The Argument:</strong> Shift from "I wasn't there" (V1) to "Their claim has no payload" (V2). The scaffolding is solid; the content is missing.</li>
+          </ol>
+        </div>
+
+        <div id="tab-academic-v2" class="hidden prose prose-slate max-w-none" role="tabpanel">
+          <h3>V2: Academic — "Physiology as OS"</h3>
+          <p>In Volume 1, physiology was an anchor. In Volume 2, it becomes the Operating System. The "Forensic Admin" method, learned from the legal battle, is now the primary study technique.</p>
+          <h4>The "Evidence Bundle" Study Method</h4>
+          <p>I no longer just "study" for exams. I build an "evidence bundle" for each module, treating the exam as a hearing where I must prove my knowledge.</p>
+          <ul>
+            <li><strong>Claim:</strong> The lecture slides.</li>
+            <li><strong>Evidence:</strong> Supporting paragraphs from the textbook.</li>
+            <li><strong>Exhibits:</strong> Lab results, annotated diagrams (e.g., HPA Axis, synaptic cleft).</li>
+            <li><strong>Affidavit:</strong> A one-page summary sheet that connects all concepts.</li>
+          </ul>
+          <p>This method converts study from passive review to active, structured assembly. It's slower, more rigorous, and builds a permanent, cross-referenced library of knowledge that directly feeds the SuppTracker project.</p>
+        </div>
+
+        <div id="tab-project-v2" class="hidden prose prose-slate max-w-none" role="tabpanel">
+          <h3>V2: Project — Seeding the Database</h3>
+          <p>The V1 lesson was "scaffolding is not a feature." The V2 protocol is "Payload-First." The project's priority is no longer the UI or deployment; it is 100% focused on seeding the database with high-quality, cited data. The "Reconstruction Protocol" dashboard guides this sprint.</p>
+          <h4>Sprint 1: The Neuro-Stack</h4>
+          <ol>
+            <li><strong>Input (from PHYL2002):</strong> Module on Neurophysiology.</li>
+            <li><strong>Input (from Health):</strong> Personal stack (L-Theanine, Magnesium, Ashwagandha).</li>
+            <li><strong>Task:</strong> Build the database entries for these three supplements.</li>
+            <li><strong>Payload (The "Content"):</strong>
+              <ul>
+                <li>`Supplement: L-Theanine`</li>
+                <li>`Mechanism: Modulates glutamate receptors (AMPA, NMDA).`</li>
+                <li>`Interaction: Caffeine (synergistic for focus).`</li>
+                <li>`Citation: [PHYL2002 Textbook, Ch. 12, p. 451]`</li>
+              </ul>
+            </li>
+          </ol>
+          <p>The app's "Ethical Scaffolding" (V1) is now built by populating it with "Forensic Admin" (V2) from "Physiology as OS" (V2).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- === CHAPTERS (EXPANDED V1 & V2) === -->
+    <section id="chapters" class="mb-4">
+      <h2 class="text-3xl font-bold text-slate-900 mb-6">Expanded Chapters (Vol 1 &amp; 2)</h2>
+
+      <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg prose prose-slate max-w-none">
+        <!-- Quick Links Nav -->
+        <nav class="not-prose mb-6">
+          <ul class="list-disc list-inside text-slate-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <li><a class="text-teal-700 hover:underline" href="#dec24-geraldton">Dec '24: Geraldton Trip (V1)</a></li>
+            <li><a class="text-teal-700 hover:underline" href="#p1c3">Jan '25: ICU Vigil (V1)</a></li>
+            <li><a class="text-teal-700 hover:underline" href="#apr25-psych-admission">Apr '25: Psych Admission (V1)</a></li>
+            <li><a class="text-teal-700 hover:underline" href="#jun25-0618-outage">Jun '25: Bank Outage (V1)</a></li>
+            <li><a class="text-teal-700 hover:underline" href="#p2c7">Jul '25: From $13k to $27k (V1)</a></li>
+            <li><a class="text-teal-700 hover:underline" href="#jul25-supptracker-debug">Jul '25: SuppTracker Debug (V1)</a></li>
+            <li><a class="text-teal-700 hover:underline" href="#p3c8">Sep '25: Physiology (V1)</a></li>
+            <li><a class="text-teal-700 hover:underline" href="#oct25-vad">Oct '25: VAD Preparations (V1)</a></li>
+            <li><a class="text-sky-700 hover:underline font-semibold" href="#nov25-forensic-admin">Nov '25: Quiet Admin (V2)</a></li>
+          </ul>
+        </nav>
+
+        <h3 class="text-2xl font-bold text-slate-800 border-b border-slate-300 pb-2 mb-6">Volume 1: The Crisis (Oct '24 - Oct '25)</h3>
+
+        <!-- 1) Geraldton Christmas Trip -->
+        <article id="dec24-geraldton">
+          <h3>Geraldton Christmas Trip — Coastal Sun, Endless Scroll</h3>
+          <p>The house smelled like salt and supermarket bleach. Sunlight came in hard and flat, bleaching thoughts and good intentions. The esky had ice; the plan had optimism. Within 24 hours, the optimism was compost.</p>
+          <p>Alana set up camp on the couch and mainlined X for sixteen hours a day like it was respiratory support. No food brought, no presents, no eye contact with reality. I did the run to the bottle-o, the servo, the bin that always overflows by Boxing Day. She posted threads about star maps and sacred bloodlines; I posted nothing and took the bins out.</p>
+        </article>
+
+        <hr class="my-10">
+
+        <!-- 2) ICU Vigil (Chapter 3) -->
+        <article id="p1c3">
+          <h3>Part One · Chapter 3: The Week That Broke the Timeline (ICU Vigil)</h3>
+          <p><strong>The room.</strong> Chlorhexidine and lemon wipes over stale air. Fluorescents buzzing at a pitch you only hear when you haven’t slept. Pulse-ox beeps doing metronome duty, speeding up when the nurse rolled him, easing when sedation took. Ventilator’s steady sigh: in–pause–out–pause. A whiteboard in dry-erase hieroglyphs: names, pain scores, “NIL BY MOUTH.”</p>
+          <p><strong>Studying between visits.</strong> Flashcards on phone because paper curls under sanitizer. Ten-minute blocks: HPA axis (CRH → ACTH → cortisol); sympathetic vs parasympathetic bullets; back to count ventilator cycles like reps. Voice memo: “Cortisol peaks ~8 a.m.; mine is 24/7—short-term-memory = trash.” Bench near the lifts: annotated slide—“this is why you can’t decide what to eat”—underlined twice. Alarms titled “Food Now, Idiot.”</p>
+        </article>
+
+        <hr class="my-10">
+
+        <!-- 3) April Admission -->
+        <article id="apr25-psych-admission">
+          <h3>April 2 — Psychiatric Admission Day (Relief with a Guilt Tax)</h3>
+          <p>Triage room: hope posters, a clock that didn’t care. She was in messiah mode; I was in logistics. The nurse used the soft voice; Alana used prophecy. Questions landed like paper airplanes.</p>
+          <p>I handed clinicians a bullet-point timeline: dates, behaviours, sleep, phone usage, detachment from reality. “This isn’t malice; it’s a very loud signal.” When they made it involuntary, her stare said <em>traitor</em>. Maybe I was—defecting to gravity. I paid the guilt tax at the vending machine with coins I didn’t have. Text to family: <em>She’s safe and angry; both are data.</em> Home was finally quiet—earned and awful.</p>
+        </article>
+
+        <hr class="my-10">
+
+        <!-- 4) June 18 Outage -->
+        <article id="jun25-0618-outage">
+          <h3>June 18 — The Bank Outage (How $13k Became $27,265.62)</h3>
+          <p>Night before: UBank said “service unavailable.” Phone, web, sacrifice—same error. 7 a.m.: still dead. Fuel light glaring. Tried to line up a ride; got the shrug emoji in real life.</p>
+          <p>I called the registry, left a message, emailed screenshots: “Attempting to attend.” Watched the window narrow like a pupil. There’s a moment you stop trying for a miracle and start making a record. I made the record.</p>
+          <p>11:40 a.m.: “Matter has been heard.” Thirty minutes later: <strong>$27,265.62</strong>. Chest: hollow heat. Took a photo of my face, then the screen, then the fuel gauge like I was building an alibi. Opened a fresh doc titled <strong>Counter-Offensive</strong> and made a checklist, because when you can’t move, you plan.</p>
+        </article>
+
+        <hr class="my-10">
+
+        <!-- 5) Legal Battle (Chapter 7) -->
+        <article id="p2c7">
+          <h3>Part Two · Chapter 7: From $13k to $27k (Documentation, Perfect Storm, Counter-Offensive)</h3>
+          <p><strong>Research map (triage).</strong> Residential Tenancies Act 1987 (WA): s 76A (condition reports), s 79 (disposal of goods), plus compensation, depreciation, mitigation. Magistrates Court practice directions for set-asides. I built two columns: “Elements they must prove → Evidence we actually have” versus “Defences → Exhibits.” Every line got a source, screenshot, or file path.</p>
+          <p><strong>Evidence bundles (forensic admin).</strong> Physical binder with tabs, mirror on USB, index page mapping exhibit codes. Panic converted into pagination.</p>
+          <p><strong>September hearing beats.</strong> <em>Posture vs payload</em>: Magistrate—“Invoices?” Agent—“Quotes.” Magistrate—“Different thing.” ... <em>The stay</em>: “Judgment stayed; matter adjourned. Produce the invoices.” Muscles I’d flexed since June finally let go.</p>
+        </article>
+
+        <hr class="my-10">
+        
+        <!-- 6) July Debugging -->
+        <article id="jul25-supptracker-debug">
+          <h3>July — SuppTracker Debugging (Scaffolding Is Not a Feature)</h3>
+          <p>Symptoms: app runs, UI clean, endpoints cheerful, results… nothing. The kind of nothing that pretends to be minimalism. Trace: frontend → API → service layer → DB query. Logs: “all good.” DB: “what DB?” Connection string pointed to a pristine, unseeded instance. Of course.</p>
+          <p>Fix: seed script, point env to the real database, add a health check that counts rows and screams if the number is suspiciously zen. Dev banner: <strong>CONTENT: 0 ROWS — DO BETTER.</strong> Reload. “Magnesium + SSRI” returns a properly dull interaction summary with citations. I wanted to hug Postgres.</p>
+          <p>README addition: <em>Scaffolding is not a feature. Load the content.</em> I taped that above the desk. It also described the lawsuit.</p>
+        </article>
+
+        <hr class="my-10">
+        
+        <!-- 7) Physiology (Chapter 8) -->
+        <article id="p3c8">
+          <h3>Part Three · Chapter 8: Physiology as Counter-Argument (Studying HPA While Living It)</h3>
+          <p><strong>Lecture moments that landed.</strong> HPA cascade slide (CRH → ACTH → cortisol). Lecturer: “Elegant until it isn’t.” I wrote: <em>mine isn’t</em>. Circadian cortisol graph: neat morning peak, graceful taper; mine looked like a picket fence. “Chronic cortisol impairs hippocampal memory”—underlined, then: <em>this is why I can recite statutes but forget breakfast</em>.</p>
+          <p><strong>Thesis of the year.</strong> Name → map → nudge. Treat self like a system with bottlenecks: sleep debt, nutrition, stress load. “Elegant until it isn’t” became my cue to pause and simplify.</p>
+        </article>
+
+        <hr class="my-10">
+
+        <!-- 8) October VAD -->
+        <article id="oct25-vad">
+          <h3>October — VAD Preparations (Procedure as Love)</h3>
+          <p>He picked a date and the world sorted itself: music, visitors, forms, the shirt he wanted (“the decent one, not the wedding one”), the joke someone had to tell so the room didn’t calcify. We built a playlist that didn’t beg for tears—his road songs that smelled like diesel and sunburn. I packed lip balm and a charger. Asked who he wanted in the room and who he wanted loved from the hallway. “Keep it small; make it true.”</p>
+          <p>The nurse walked us through each step with the kind of care that forgives the universe for a minute. He signed; we witnessed; the pen felt too light for the weight of it. ... On the day, we treated procedure like liturgy. He said what he needed to say without drama; we did the same without bargaining. When it went quiet, it wasn’t empty. I stepped outside into a rude, perfect blue. Hated it. Needed it. Went home and updated the timeline because love deserves accuracy.</p>
+        </article>
+        
+        
+        <h3 class="text-2xl font-bold text-slate-800 border-b border-slate-300 pb-2 my-10">Volume 2: The Reconstruction (Nov '25 —)</h3>
+        
+        <!-- 9) [NEW] Nov 25 Chapter -->
+        <article id="nov25-forensic-admin">
+          <h3>November '25 — The Quiet Admin</h3>
+          <p>There is a silence after sustained crisis that feels less like peace and more like an ambush you haven't found yet. For the first week of November, I kept checking my email for summonses, my phone for family emergencies. The quiet was loud. My HPA axis, so used to a "continuous infusion," didn't know how to taper. I had to give it a new job, or it would invent one.</p>
+          <p>So I gave it a job. I opened PHYL2002. I opened the tenancy file. I opened the SuppTracker repo. And I started doing the admin. Not frantic, panic-driven admin. Just... quiet admin. Converting panic into pagination, but this time without the panic. Treating my study notes with the same procedural rigor as a court document. Treating the SuppTracker database with the same reverence as my father's VAD procedure.</p>
+          <p><strong>The new feeling:</strong> It's not "motivation." It's structure. It's the "Forensic Admin" protocol applied to reconstruction. The V1 lesson was "I'm not heroic. I'm stubborn with receipts." The V2 application is to be stubborn with receipts <em>before</em> the emergency. It's building the scaffolding <em>and</em> loading the payload, on my own terms, in the quiet.</p>
+        </article>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-slate-800 text-slate-400 mt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+      <p class="text-sm">Interactive autobiography &amp; operational protocol. (Nov 2025)</p>
+      <p class="text-xs mt-2">Built with Tailwind CSS and Chart.js. Content rendered from internal JS data objects.</p>
+    </div>
+  </footer>
+
+  <script>
+    // --- GEMINI API CONFIG ---
+    // -------------------------------------------------------------------------
+    // IMPORTANT: Paste your Gemini API key here.
+    const apiKey = ""; // <--- PASTE YOUR API KEY HERE
+    // -------------------------------------------------------------------------
+    
+    // Check if API key is set and update the message box
+    function checkApiKey() {
+      const msgDiv = document.getElementById('apiKeyMessage');
+      if (apiKey) {
+        msgDiv.style.backgroundColor = '#ecfdf5'; // Green 50
+        msgDiv.style.borderColor = '#a7f3d0'; // Green 200
+        msgDiv.style.color = '#065f46'; // Green 800
+        msgDiv.innerHTML = '<strong>Gemini API Key is active.</strong> Features are enabled.';
+      } else {
+         msgDiv.style.display = 'block'; // Ensure it's visible if no key
+      }
+    }
+
+    /**
+     * Calls the Gemini API with exponential backoff.
+     * @param {string} prompt The user prompt.
+     * @param {string} systemPrompt The system instruction.
+     * @param {boolean} useJsonMode Whether to request a JSON response.
+     * @param {number} maxRetries Maximum number of retries.
+     * @returns {Promise<string>} The generated text content.
+     */
+    async function callGeminiApi(prompt, systemPrompt, useJsonMode = false, maxRetries = 3) {
+      if (!apiKey) {
+        throw new Error("API key is not set. Please add it to the script.");
+      }
+
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+      
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+      };
+
+      if (useJsonMode) {
+        payload.generationConfig = {
+          responseMimeType: "application/json",
+          // Define a basic schema for the project payload. A more specific schema could be used.
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              "supplementName": { "type": "STRING" },
+              "mechanisms": {
+                  "type": "ARRAY",
+                  "items": { 
+                    "type": "OBJECT",
+                    "properties": {
+                      "description": { "type": "STRING" },
+                      "citation": { "type": "STRING" }
+                    }
+                  }
+              },
+              "interactions": {
+                  "type": "ARRAY",
+                  "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                      "supplementName": { "type": "STRING" },
+                      "effect": { "type": "STRING" }
+                    }
+                  }
+              }
+            }
+          }
+        };
+      }
+
+      let delay = 1000; // Start with 1 second
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            // Handle non-200 responses
+            if (response.status === 429) { // Throttling
+              throw new Error('Rate limited');
+            }
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          const candidate = result.candidates?.[0];
+
+          if (candidate && candidate.content?.parts?.[0]?.text) {
+            return candidate.content.parts[0].text;
+          } else {
+            throw new Error("Invalid response structure from API.");
+          }
+        } catch (error) {
+          if (error.message === 'Rate limited' && i < maxRetries - 1) {
+            // This is a retryable error
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2; // Exponential backoff
+          } else {
+            // This is a non-retryable error or max retries reached
+            console.error("Gemini API call failed:", error);
+            throw error; // Re-throw the last error
+          }
+        }
+      }
+      // This line should not be reachable, but as a fallback
+      throw new Error("Max retries reached for Gemini API call.");
+    }
+
+    /**
+     * Helper to set button/output states.
+     * @param {string} btnId Button ID.
+     * @param {string} outputId Output element ID.
+     * @param {string} state "loading", "error", "success", or "clear".
+     * @param {string} [content] Content to display on success/error.
+     */
+    function setFeatureState(btnId, outputId, state, content = "") {
+      const button = document.getElementById(btnId);
+      const output = document.getElementById(outputId);
+
+      if (!button || !output) return;
+
+      if (state === "loading") {
+        button.disabled = true;
+        button.textContent = "Loading...";
+        output.classList.remove('hidden');
+        output.textContent = "Generating response...";
+      } else if (state === "error") {
+        button.disabled = false;
+        button.innerHTML = `✨ ${button.dataset.originalText || 'Generate'}`;
+        output.style.color = '#b91c1c'; // Red-800
+        output.textContent = `Error: ${content}`;
+      } else if (state === "success") {
+        button.disabled = false;
+        button.innerHTML = `✨ ${button.dataset.originalText || 'Generate'}`;
+        output.style.color = '#374151'; // Gray-700
+        output.textContent = content;
+      } else if (state === "clear") {
+        button.disabled = false;
+        button.innerHTML = `✨ ${button.dataset.originalText || 'Generate'}`;
+        output.classList.add('hidden');
+        output.textContent = "";
+        output.style.color = '#374151';
+      }
+    }
+
+
+    // --- DATA STORAGE (V1) ---
+    const stressData = {
+      labels: ["Oct '24","Nov '24","Dec '24","Jan '25","Feb '25","Mar '25","Apr '25","May '25","Jun '25","Jul '25","Aug '25","Sep '25","Oct '25"],
+      data:   [4,5,7,10,8,8,9,7,10,9,6,7,10],
+      details: [
+        "Initial relationship volatility and academic pressure.",
+        "Study focus intensifies. Relationship strain grows.",
+        "Geraldton Christmas trip. Total partner disconnect (~16h/day on X).",
+        "PEAK: Lock change after breach. Father rushed to ICU with sepsis. Palliative care elected.",
+        "Father stabilizes. Exam prep under duress. Alana's reality-testing remains weak.",
+        "Tenancy dispute begins. Formal legal prep. Alana's mental state unravels.",
+        "CRISIS: Alana involuntarily admitted (Apr 2). Discharged and arrested (Apr 22-23).",
+        "Grind: Studying for finals while compiling evidence for tenancy case.",
+        "PEAK: $27k default judgment entered in absentia. Bank outage, missed hearing.",
+        "Racing the deadline. Filed Form 16 (set-aside) on July 9. Discovered SuppTracker bug.",
+        "Seeding the future. Fixing SuppTracker DB. Studies advance.",
+        "Set-aside hearing. Court adjourns for evidence, a positive sign. Academic finals.",
+        "PEAK: Final exams. Father sets VAD date. Father's passing (Oct 20)."
+      ]
+    };
+
+    const timelineData = [
+      { date: "Oct '24", category: "Academic", title: "Study Focus Intensifies", text: "Deep dive into Neuroscience and Physiology units." },
+      { date: "Dec '24", category: "Personal", title: "Geraldton Christmas Trip", text: "Relationship strains clear. Alana spends ~16h/day on X, contributing nothing." },
+      { date: "Jan '25", category: "Personal", title: "Separation & Lock Change", text: "Began sleeping separately. Replaced lock and installed camera after boundary breach." },
+      { date: "Jan '25", category: "Personal", title: "ICU Vigil", text: "Father rushed to ICU with sepsis, elects palliative care, then miraculously stabilizes." },
+      { date: "Mar '25", category: "Legal",  title: "Tenancy Dispute Begins", text: "Landlords file initial claim (~$13k). Began meticulously documenting everything." },
+      { date: "Apr '25", category: "Personal", title: "Psychiatric Admission", text: "Alana involuntarily admitted to a psychiatric ward (Apr 2)." },
+      { date: "Apr '25", category: "Personal", title: "Arrest at Watch House", text: "Alana arrested hours after discharge on an outstanding warrant (Apr 22-23)." },
+      { date: "May '25", category: "Academic", title: "The Grind", text: "Studying for PHYL/PSYC finals while simultaneously compiling legal evidence." },
+      { date: "Jun '25", category: "Legal",  title: "Default Judgment", text: "Missed hearing. Court enters default judgment for $27,265.62 (Jun 18)." },
+      { date: "Jul '25", category: "Legal",  title: "Filed Set-Aside", text: "Filed Form 16 and affidavit on July 9; argued non-attendance and substantive defenses." },
+      { date: "Jul '25", category: "Project",title: "SuppTracker Facepalm", text: "Discovered the core bug: the supplement database was completely empty." },
+      { date: "Jul '25", category: "Academic", title: "Exams", text: "Sat final exams for PHYL1001, PHYL2002, and PSYC1101." },
+      { date: "Sep '25", category: "Legal",  title: "Set-Aside Hearing", text: "Magistrate stays judgment; adjourns for invoice production." },
+      { date: "Oct '25", category: "Academic", title: "Finals & HPA Axis", text: "Final academic push; lived example of chronic stress physiology." },
+      { date: "Oct '25", category: "Personal", title: "Father's VAD", text: "Father sets VAD date (Oct 13) and passes with dignity (Oct 20)." }
+    ];
+
+    // --- GEMINI FEATURE FUNCTIONS ---
+
+    // 1. Generate Study Questions
+    async function generateStudyQuestions() {
+      const btnId = 'btn-study-questions';
+      const outputId = 'output-study-questions';
+      try {
+        setFeatureState(btnId, outputId, 'loading');
+        const topic = document.getElementById('academic-topic').textContent.replace('CURRENT TOPIC:', '').trim();
+        
+        const systemPrompt = "You are a UWA physiology tutor for PHYL2002. Generate 3 insightful, short-answer questions based on the following topics. Focus on mechanisms and critical thinking, not just definitions. Keep the output concise and formatted with numbering.";
+        const userPrompt = `Topics: ${topic}`;
+
+        const response = await callGeminiApi(userPrompt, systemPrompt);
+        setFeatureState(btnId, outputId, 'success', response);
+      } catch (error) {
+        setFeatureState(btnId, outputId, 'error', error.message);
+      }
+    }
+
+    // 2. Analyze Health Stack
+    async function analyzeStack() {
+      const btnId = 'btn-analyze-stack';
+      const outputId = 'output-analyze-stack';
+      try {
+        setFeatureState(btnId, outputId, 'loading');
+        const stackItems = Array.from(document.getElementById('health-stack-list').querySelectorAll('li'))
+          .map(li => li.textContent.split(':')[0].replace('**', '').trim());
+        const stack = stackItems.join(', ');
+
+        const systemPrompt = "You are a health systems analyst. Based on the following supplements, describe the *likely overall physiological effect* or 'vibe' (e.g., 'calm focus', 'neural support') in one concise sentence. Do not give medical advice or make claims. This is for thematic grouping.";
+        const userPrompt = `Supplement stack: ${stack}`;
+        
+        const response = await callGeminiApi(userPrompt, systemPrompt);
+        setFeatureState(btnId, outputId, 'success', response);
+      } catch (error) {
+        setFeatureState(btnId, outputId, 'error', error.message);
+      }
+    }
+
+    // 3. Draft DB Payload
+    async function draftApiPayload() {
+      const btnId = 'btn-draft-payload';
+      const outputId = 'output-draft-payload';
+      try {
+        setFeatureState(btnId, outputId, 'loading');
+        const taskItems = Array.from(document.getElementById('project-task-list').querySelectorAll('li'))
+          .map(li => li.textContent.trim());
+        const task = taskItems.join('\n');
+
+        const systemPrompt = `You are a senior backend developer building the SuppTracker database. Based on the following task, generate a *draft* JSON object for the database. 
+Use this exact schema: 
+{ 
+  "supplementName": "string", 
+  "mechanisms": [{"description": "string", "citation": "string"}], 
+  "interactions": [{"supplementName": "string", "effect": "string"}] 
+}`;
+        const userPrompt = `Task:\n${task}\n\nAlso add a known interaction: L-Theanine + Caffeine (synergistic for focus).`;
+
+        const response = await callGeminiApi(userPrompt, systemPrompt, true); // true for JSON mode
+        const parsedJson = JSON.parse(response); // The API returns a string, so we parse it
+        const formattedJson = JSON.stringify(parsedJson, null, 2); // Pretty-print
+        
+        setFeatureState(btnId, outputId, 'success', formattedJson);
+      } catch (error) {
+        setFeatureState(btnId, outputId, 'error', error.message);
+      }
+    }
+
+
+    // --- PAGE INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // V1 Init
+      initStressChart();
+      renderTimeline('All');
+      setupTimelineFilters();
+      setupTabs();
+      setupChartInteraction();
+
+      // V2 (Gemini) Init
+      checkApiKey();
+      
+      // Store original button text
+      document.getElementById('btn-study-questions').dataset.originalText = "Generate Study Questions";
+      document.getElementById('btn-analyze-stack').dataset.originalText = 'Analyze Stack "Vibe"';
+      document.getElementById('btn-draft-payload').dataset.originalText = "Draft DB Payload (JSON)";
+      
+      // Add event listeners
+      document.getElementById('btn-study-questions').addEventListener('click', generateStudyQuestions);
+      document.getElementById('btn-analyze-stack').addEventListener('click', analyzeStack);
+      document.getElementById('btn-draft-payload').addEventListener('click', draftApiPayload);
+    });
+
+    // --- V1 FUNCTIONS ---
+
+    // 1) Stress Chart
+    function initStressChart() {
+      const ctx = document.getElementById('stressChart').getContext('2d');
+      if (!ctx) return; // Guard against element not found
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(239, 68, 68, 0.6)');
+      gradient.addColorStop(1, 'rgba(239, 68, 68, 0.05)');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: stressData.labels,
+          datasets: [{
+            label: 'Stress Index',
+            data: stressData.data,
+            borderColor: '#ef4444',
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#ef4444',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#ef4444',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 10, title: { display: true, text: 'Subjective Stress Level' } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: true,
+              mode: 'index',
+              intersect: false,
+              callbacks: { label: (context) => `Stress Level: ${context.parsed._y}` } // Note: Chart.js v4 uses _y
+            }
+          },
+          interaction: { mode: 'index', intersect: false },
+          onClick: (e, elements) => {
+            if (elements.length > 0) {
+              const index = elements[0].index;
+              const details = stressData.details[index];
+              document.getElementById('chart-details').textContent = details;
+            }
+          }
+        }
+      });
+    }
+
+    function setupChartInteraction() {
+      const chartDetails = document.getElementById('chart-details');
+      const canvas = document.getElementById('stressChart');
+      if (!canvas || !chartDetails) return;
+      canvas.addEventListener('mouseleave', () => {
+        chartDetails.textContent = 'Click a point on the chart to see details.';
+      });
+    }
+
+    // 2) Timeline
+    function renderTimeline(filter) {
+      const container = document.getElementById('timeline-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const filteredData = (filter === 'All') ? timelineData : timelineData.filter(item => item.category === filter);
+
+      const colorMap = {
+        "Personal": "bg-pink-500",
+        "Legal": "bg-red-500",
+        "Academic": "bg-blue-500",
+        "Project": "bg-emerald-500"
+      };
+
+      filteredData.forEach(item => {
+        const dotColor = colorMap[item.category] || "bg-slate-400";
+        const itemEl = document.createElement('div');
+        itemEl.className = "mb-8 pl-8 relative border-l border-slate-300";
+        itemEl.innerHTML = `
+          <div class="absolute -left-[7px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white ${dotColor}"></div>
+          <time class="mb-1 text-sm font-normal leading-none text-slate-500">${item.date}</time>
+          <h3 class="text-lg font-semibold text-slate-900">${item.title}</h3>
+          <p class="text-base font-normal text-slate-700">${item.text}</p>
+        `;
+        container.appendChild(itemEl);
+      });
+    }
+
+    function setupTimelineFilters() {
+      const filterContainer = document.getElementById('timeline-filters');
+      if (!filterContainer) return;
+      filterContainer.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+          const filter = e.target.dataset.filter;
+
+          // reset all buttons
+          const buttons = filterContainer.querySelectorAll('button');
+          buttons.forEach(btn => {
+            btn.classList.remove('bg-teal-600','text-white','shadow-lg');
+            btn.classList.add('bg-white','text-slate-700','hover:bg-slate-100');
+            btn.setAttribute('aria-pressed','false');
+          });
+
+          // activate clicked
+          e.target.classList.remove('bg-white','text-slate-700','hover:bg-slate-100');
+          e.target.classList.add('bg-teal-600','text-white','shadow-lg');
+          e.target.setAttribute('aria-pressed','true');
+
+          renderTimeline(filter);
+        }
+      });
+    }
+
+    // 3) Tabs
+    function setupTabs() {
+      const tabButtonsContainer = document.getElementById('tab-buttons');
+      if (!tabButtonsContainer) return;
+      
+      const tabButtons = tabButtonsContainer.querySelectorAll('button');
+      const tabPanels  = document.querySelectorAll('#tab-content > div');
+
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabName = btn.dataset.tab;
+          const color = btn.dataset.color || 'teal'; // Default to teal
+
+          // Deactivate all buttons
+          tabButtons.forEach(b => {
+            b.classList.remove('bg-white', 'text-teal-700', 'border-teal-700', 'text-sky-700', 'border-sky-700', 'border-b-2');
+            b.classList.add('text-slate-600','hover:bg-slate-100');
+            b.setAttribute('aria-selected','false');
+          });
+          
+          // Deactivate all panels
+          tabPanels.forEach(p => p.classList.add('hidden'));
+
+          // Activate clicked button
+          btn.classList.remove('text-slate-600','hover:bg-slate-100');
+          btn.classList.add('bg-white', `text-${color}-700`, 'border-b-2', `border-${color}-700`);
+          btn.setAttribute('aria-selected','true');
+
+          // Activate corresponding panel
+          const panel = document.getElementById(`tab-${tabName}`);
+          if (panel) panel.classList.remove('hidden');
+        });
+      });
+    }
+  </script>
+</body>
+</html>
