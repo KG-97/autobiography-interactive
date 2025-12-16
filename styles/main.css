@@ -110,6 +110,25 @@ a {
   position: relative;
 }
 
+.hero__controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.hero__badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--accent);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .hero__eyebrow {
   letter-spacing: 0.35em;
   text-transform: uppercase;
@@ -129,6 +148,33 @@ a {
   max-width: 48ch;
   color: var(--text-muted);
   font-size: 1.1rem;
+}
+
+.hero__meta {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hero__meta-item {
+  padding: 0.85rem 1rem;
+  background: rgba(148, 163, 184, 0.08);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.hero__meta-label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.hero__meta-value {
+  font-weight: 700;
 }
 
 .hero__stats {
@@ -191,6 +237,11 @@ a {
   padding: clamp(4rem, 10vw, 7rem) clamp(1.5rem, 8vw, 4.5rem);
 }
 
+.section--muted {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.08), transparent 48%);
+  border-block: 1px solid var(--border);
+}
+
 .section__header {
   display: grid;
   gap: 0.75rem;
@@ -246,6 +297,73 @@ a {
   background: radial-gradient(circle, rgba(56, 189, 248, 0.55), transparent);
   opacity: 0.6;
   filter: blur(4px);
+}
+
+.signals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.signal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.2);
+}
+
+.signal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.signal__cadence {
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.signal__title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.signal__metric {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.signal__description {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.signal__progress {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.signal__progress-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.9), rgba(59, 130, 246, 0.95));
+  transition: width 0.4s ease;
 }
 
 .timeline__controls {
@@ -414,6 +532,54 @@ a {
   transition: transform 0.6s ease;
 }
 
+.toolkit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.tool {
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.tool__name {
+  margin: 0 0 0.35rem;
+}
+
+.tool__description {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.tool__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--accent);
+  background: rgba(56, 189, 248, 0.12);
+  font-weight: 700;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.tool__link:hover,
+.tool__link:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.25);
+}
+
 .footer {
   padding: 2.5rem 1.5rem;
   text-align: center;
@@ -425,10 +591,8 @@ a {
   text-decoration: none;
 }
 
+
 .theme-toggle {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: rgba(148, 163, 184, 0.12);

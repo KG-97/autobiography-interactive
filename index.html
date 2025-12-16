@@ -16,9 +16,12 @@
     <header class="hero" id="top">
       <div class="hero__overlay"></div>
       <div class="hero__content">
-        <button class="theme-toggle" aria-label="Toggle theme">
-          <span class="theme-toggle__icon" aria-hidden="true">🌓</span>
-        </button>
+        <div class="hero__controls">
+          <button class="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-toggle__icon" aria-hidden="true">🌓</span>
+          </button>
+          <span class="hero__badge">Live dossier</span>
+        </div>
         <p class="hero__eyebrow">Interactive Autobiography</p>
         <h1 class="hero__title"></h1>
         <p class="hero__subtitle"></p>
@@ -26,6 +29,20 @@
         <div class="hero__cta">
           <a class="button" href="#timeline">Explore the journey</a>
           <a class="button button--ghost" href="#achievements">Celebrate wins</a>
+        </div>
+        <div class="hero__meta">
+          <div class="hero__meta-item">
+            <span class="hero__meta-label">Updated</span>
+            <span class="hero__meta-value">Weekly</span>
+          </div>
+          <div class="hero__meta-item">
+            <span class="hero__meta-label">Built for</span>
+            <span class="hero__meta-value">Gemini · Railway · Web</span>
+          </div>
+          <div class="hero__meta-item">
+            <span class="hero__meta-label">Format</span>
+            <span class="hero__meta-value">Static + API-ready</span>
+          </div>
         </div>
       </div>
     </header>
@@ -53,6 +70,14 @@
         </div>
       </section>
 
+      <section class="section section--muted" id="signals">
+        <div class="section__header">
+          <h2>Signals and rituals</h2>
+          <p>Heartbeat checks that keep the story reliable, inclusive, and responsive.</p>
+        </div>
+        <div class="signals" aria-live="polite"></div>
+      </section>
+
       <section class="section" id="timeline">
         <div class="section__header">
           <h2>Timeline</h2>
@@ -72,12 +97,20 @@
         <div class="achievements" role="list"></div>
       </section>
 
-      <section class="section" id="skills">
+      <section class="section section--muted" id="skills">
         <div class="section__header">
           <h2>Capabilities in motion</h2>
           <p>Track growth areas and where they shine throughout the story.</p>
         </div>
         <div class="skills"></div>
+      </section>
+
+      <section class="section" id="toolkit">
+        <div class="section__header">
+          <h2>Toolkit for collaborators</h2>
+          <p>Downloadable guides and rituals to help teams ship narrative work confidently.</p>
+        </div>
+        <div class="toolkit"></div>
       </section>
     </main>
 

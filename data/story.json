@@ -4,21 +4,44 @@
     "tagline": "Designing interactive storytelling systems that travel across every platform.",
     "stats": [
       { "label": "Years shipping experiences", "value": 12 },
-      { "label": "Major releases", "value": 28 },
-      { "label": "Communities impacted", "value": "1.2M" }
+      { "label": "Major releases", "value": 32 },
+      { "label": "Communities impacted", "value": 1400000 },
+      { "label": "Storyteller circles hosted", "value": 58 }
     ],
     "summary": "Curious, human-centered technologist crafting narrative-driven products for web, conversational AI, and live events.",
     "focus": [
       "Designing adaptive story flows for Gemini",
       "Expanding Railway deployment automations",
-      "Hosting an open archive for public readers"
+      "Hosting an open archive for public readers",
+      "Pairing writers with AI copilots that keep their voice intact"
     ],
     "prompts": [
       "How did today's experiment change the way you tell this story?",
       "What would a first-time visitor remember from this chapter?",
-      "Which collaborator helped illuminate the theme today?"
+      "Which collaborator helped illuminate the theme today?",
+      "Where could a small prototype relieve friction for readers?"
     ]
   },
+  "signals": [
+    {
+      "title": "Reader Delight",
+      "cadence": "Weekly",
+      "description": "Snapshot interviews that capture what resonated and what confused readers.",
+      "metric": 0.78
+    },
+    {
+      "title": "Release Rhythm",
+      "cadence": "Bi-weekly",
+      "description": "Shipping small, observable updates to keep the archive lively.",
+      "metric": 0.86
+    },
+    {
+      "title": "Accessibility Health",
+      "cadence": "Monthly",
+      "description": "Audits that ensure motion, color, and content stay inclusive.",
+      "metric": 0.92
+    }
+  ],
   "timeline": [
     {
       "year": 2014,
@@ -38,60 +61,77 @@
       "year": 2019,
       "title": "Railway deployment pipeline",
       "category": "platform",
-      "description": "Automated environment provisioning, preview URLs, and scheduled backups so storytellers can focus on craft, not infrastructure.",
-      "tags": ["devops", "automation"]
+      "description": "Built a pipeline for deploying stories to Railway with linting, visual diffs, and performance budgets.",
+      "tags": ["devops", "performance", "ci/cd"]
     },
     {
-      "year": 2021,
-      "title": "Gemini narrative experiments",
-      "category": "research",
-      "description": "Worked with multimodal prompts, dynamic tone adjustments, and voice staging to build living autobiographies with Gemini.",
-      "tags": ["ai", "experimentation"]
+      "year": 2022,
+      "title": "Conversational archive pilot",
+      "category": "conversation",
+      "description": "Taught the story to answer questions in plain language, with receipts from the timeline for trust.",
+      "tags": ["chat", "retrieval", "ethics"]
     },
     {
-      "year": 2023,
-      "title": "Public launch of interactive autobiography",
-      "category": "launch",
-      "description": "Unified the Gemini conversational experience with a polished web destination and Railway-backed automation.",
-      "tags": ["launch", "product design"]
+      "year": 2024,
+      "title": "Immersive reading room",
+      "category": "experience",
+      "description": "Mixed spatial audio and tactile cues to help visitors feel each chapter, both online and at live events.",
+      "tags": ["immersive", "sound", "events"]
     }
   ],
   "achievements": [
     {
-      "title": "Storyworld festival keynote",
-      "description": "Shared lessons on bringing machine learning empathy into autobiographical design.",
-      "mediaColor": "linear-gradient(135deg, #0ea5e9, #9333ea)",
+      "title": "Public archive relaunch",
+      "description": "Rebuilt the autobiography for fast static hosting and resilient offline access.",
+      "mediaColor": "linear-gradient(135deg, #6366f1, #0ea5e9)",
       "details": [
-        "Built a live demo that reacted to audience prompts",
-        "Published resources for educators and community leaders",
-        "Raised funding for an inclusive story lab"
+        "Implemented prefetching and responsive images for 40% faster loads",
+        "Published Railway-ready deployment manifest for frictionless shipping",
+        "Added transparent versioning so collaborators can follow along"
       ]
     },
     {
-      "title": "Railway automation suite",
-      "description": "Packaged infrastructure tooling so smaller teams could host narratives with confidence.",
-      "mediaColor": "linear-gradient(135deg, #22d3ee, #2563eb)",
+      "title": "Conversation-ready narrative",
+      "description": "Designed prompts, memory constraints, and safety rails for chat-based storytelling.",
+      "mediaColor": "linear-gradient(135deg, #14b8a6, #22d3ee)",
       "details": [
-        "Provisioned safe staging and production parity",
-        "Scripted one-click rollbacks",
-        "Documented incident playbooks with lived examples"
+        "Introduced retrieval layers that keep answers grounded with citations",
+        "Built tone-aware responses to mirror the author's voice",
+        "Captured reader feedback loops to improve each release"
       ]
     },
     {
-      "title": "Community story fellowship",
-      "description": "Mentored eight creators to publish interactive autobiographies in their own languages.",
-      "mediaColor": "linear-gradient(135deg, #f97316, #facc15)",
+      "title": "Accessibility and inclusion upgrade",
+      "description": "Rolled out tactile-friendly controls, prefers-reduced-motion support, and high-contrast palettes.",
+      "mediaColor": "linear-gradient(135deg, #f97316, #f59e0b)",
       "details": [
-        "Established translation and accessibility reviews",
-        "Held weekly critique sessions with global guests",
-        "Launched shared asset libraries for reuse"
+        "Documented rituals for manual and automated accessibility checks",
+        "Ensured every narrative card stays legible across light and dark themes",
+        "Partnered with readers to test screen reader flows end-to-end"
       ]
     }
   ],
   "skills": [
-    { "name": "Narrative systems", "level": "Expert", "progress": 0.92 },
-    { "name": "Human-centered research", "level": "Advanced", "progress": 0.83 },
-    { "name": "Platform automation", "level": "Advanced", "progress": 0.8 },
-    { "name": "Visual storytelling", "level": "Proficient", "progress": 0.72 }
+    { "name": "Story systems", "level": "Lead", "progress": 0.92 },
+    { "name": "Interface craft", "level": "Senior", "progress": 0.86 },
+    { "name": "Inclusive research", "level": "Senior", "progress": 0.81 },
+    { "name": "Deployment automation", "level": "Senior", "progress": 0.78 }
+  ],
+  "toolkit": [
+    {
+      "name": "Story map",
+      "description": "An inventory of chapters, intents, and assets to keep every release coherent.",
+      "link": "https://example.com/story-map"
+    },
+    {
+      "name": "Workshop kit",
+      "description": "Printable canvases and facilitation guides for narrative co-creation.",
+      "link": "https://example.com/workshop-kit"
+    },
+    {
+      "name": "Release checklist",
+      "description": "A living checklist that balances performance, accessibility, and delight.",
+      "link": "https://example.com/release-checklist"
+    }
   ]
 }

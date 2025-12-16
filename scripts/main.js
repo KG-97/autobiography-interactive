@@ -57,6 +57,33 @@ function updatePrompt(prompts) {
   document.querySelector('.narrative__prompt').textContent = prompt;
 }
 
+function renderSignals(signals) {
+  const container = document.querySelector('.signals');
+  container.innerHTML = '';
+
+  signals.forEach((signal) => {
+    const article = document.createElement('article');
+    article.className = 'signal';
+    const percentage = Math.round(signal.metric * 100);
+
+    article.innerHTML = `
+      <div class="signal__header">
+        <div>
+          <p class="signal__cadence">${signal.cadence}</p>
+          <h3 class="signal__title">${signal.title}</h3>
+        </div>
+        <span class="signal__metric" aria-label="${percentage}% confidence">${percentage}%</span>
+      </div>
+      <p class="signal__description">${signal.description}</p>
+      <div class="signal__progress" role="presentation">
+        <div class="signal__progress-bar" style="width: ${percentage}%"></div>
+      </div>
+    `;
+
+    container.appendChild(article);
+  });
+}
+
 function renderTimeline(timeline, filter = 'all') {
   const container = document.querySelector('.timeline');
   container.innerHTML = '';
@@ -101,6 +128,12 @@ function renderTimeline(timeline, filter = 'all') {
 
 function renderFilters(timeline) {
   const controls = document.querySelector('.timeline__controls');
+  controls.querySelectorAll('.chip').forEach((chip) => chip.setAttribute('aria-pressed', 'false'));
+  const defaultChip = controls.querySelector('[data-filter="all"]');
+  if (defaultChip) {
+    defaultChip.setAttribute('aria-pressed', 'true');
+  }
+
   const categories = Array.from(new Set(timeline.map((item) => item.category)));
 
   categories.forEach((category) => {
@@ -108,6 +141,7 @@ function renderFilters(timeline) {
     button.className = 'chip';
     button.dataset.filter = category;
     button.textContent = category;
+    button.setAttribute('aria-pressed', 'false');
     controls.appendChild(button);
   });
 
@@ -119,7 +153,11 @@ function renderFilters(timeline) {
 
     controls
       .querySelectorAll('.chip')
-      .forEach((chip) => chip.classList.toggle('chip--active', chip.dataset.filter === filter));
+      .forEach((chip) => {
+        const isActive = chip.dataset.filter === filter;
+        chip.classList.toggle('chip--active', isActive);
+        chip.setAttribute('aria-pressed', String(isActive));
+      });
 
     renderTimeline(state.data.timeline, filter);
   });
@@ -157,12 +195,31 @@ function renderSkills(skills) {
         <span class="skill__name">${skill.name}</span>
         <span class="skill__level">${skill.level}</span>
       </div>
-      <div class="skill__progress">
+      <div class="skill__progress" role="presentation">
         <div class="skill__progress-bar" style="transform: scaleX(${skill.progress})"></div>
       </div>
     `;
 
     container.appendChild(skillElement);
+  });
+}
+
+function renderToolkit(toolkit) {
+  const container = document.querySelector('.toolkit');
+  container.innerHTML = '';
+
+  toolkit.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = 'tool';
+    card.innerHTML = `
+      <div>
+        <h3 class="tool__name">${item.name}</h3>
+        <p class="tool__description">${item.description}</p>
+      </div>
+      <a class="tool__link" href="${item.link}" target="_blank" rel="noreferrer">Open</a>
+    `;
+
+    container.appendChild(card);
   });
 }
 
@@ -229,10 +286,12 @@ async function init() {
     const data = await loadData();
     renderHero(data.profile);
     renderNarrative(data.profile);
+    renderSignals(data.signals);
     renderTimeline(data.timeline, state.activeFilter);
     renderFilters(data.timeline);
     renderAchievements(data.achievements);
     renderSkills(data.skills);
+    renderToolkit(data.toolkit);
     setupPromptShuffle(data.profile.prompts);
     setupModal(data.achievements);
     setupThemeToggle();

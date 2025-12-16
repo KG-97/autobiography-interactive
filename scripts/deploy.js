@@ -24,7 +24,7 @@ async function createManifest() {
     generatedAt: new Date().toISOString(),
     files: ['index.html', 'styles/main.css', 'scripts/main.js', 'data/story.json'],
     instructions: 'Serve the dist directory with any static file host or upload to Railway.',
-    version: '1.0.0'
+    version: '1.1.0'
   };
 
   await writeFile(path.join(distDir, 'deploy-manifest.json'), JSON.stringify(manifest, null, 2));
