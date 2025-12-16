@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import story from '../data/story.json' assert { type: 'json' };
+import story from '../data/story.json' with { type: 'json' };
 
 test('story profile includes prompts and focus areas', () => {
   assert.ok(story.profile.name, 'Profile should include a name');
@@ -24,5 +24,22 @@ test('achievements include detail bullet points', () => {
   assert.ok(Array.isArray(story.achievements), 'Achievements must be an array');
   for (const achievement of story.achievements) {
     assert.ok(achievement.details?.length, 'Achievement should have details');
+  }
+});
+
+test('signals track cadence and metric', () => {
+  assert.ok(Array.isArray(story.signals), 'Signals must be an array');
+  for (const signal of story.signals) {
+    assert.ok(signal.title, 'Signal requires a title');
+    assert.ok(signal.cadence, 'Signal needs a cadence');
+    assert.ok(typeof signal.metric === 'number', 'Signal metric must be numeric');
+  }
+});
+
+test('toolkit entries include destinations', () => {
+  assert.ok(Array.isArray(story.toolkit), 'Toolkit must be an array');
+  for (const item of story.toolkit) {
+    assert.ok(item.name, 'Toolkit item needs a name');
+    assert.ok(item.link?.startsWith('http'), 'Toolkit item should link to a URL');
   }
 });

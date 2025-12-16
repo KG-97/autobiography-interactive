@@ -2,6 +2,8 @@
 
 Interactive autobiography deployment. Includes full HTML/CSS/JS code, narrative, and interactive features for Gemini, Railway, and public web hosting.
 
+The latest update adds ritual tracking, a collaborator toolkit, and refreshed visual systems for the hero, signals, and timeline sections.
+
 ## Getting started
 
 This project is a static site that loads narrative content from `data/story.json`. The interface renders a hero section with story stats, a living narrative board, filterable timeline, modal-based achievement gallery, and skill progression tracker. Theme toggling keeps the site readable in light or dark environments.
@@ -28,5 +30,6 @@ No dependencies are required beyond the Node runtime. If you would like to add p
 ### Customizing the narrative
 
 - Update `data/story.json` with your own profile, timeline, achievements, and skills.
+- Extend `signals` and `toolkit` entries in `data/story.json` to change the ritual tracking and downloadable resources.
 - Modify styles in `styles/main.css` to adjust the visual language.
 - Extend interactions in `scripts/main.js` for new components or data visualizations.
