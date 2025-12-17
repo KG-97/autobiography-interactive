@@ -1,22 +1,33 @@
 export function formatStatValue(value) {
-  if (typeof value !== 'number') {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     return String(value);
   }
 
-  const thresholds = [
-    { limit: 1_000_000_000, suffix: 'b' },
-    { limit: 1_000_000, suffix: 'm' },
-    { limit: 1_000, suffix: 'k' }
-  ];
+  const suffixes = ['', 'k', 'm', 'b'];
+  let scaled = value;
+  let suffixIndex = 0;
 
-  const absoluteValue = Math.abs(value);
+  while (Math.abs(scaled) >= 1000 && suffixIndex < suffixes.length - 1) {
+    scaled /= 1000;
+    suffixIndex += 1;
+  }
 
-  for (const { limit, suffix } of thresholds) {
-    if (absoluteValue >= limit) {
-      const formatted = (value / limit).toFixed(1).replace(/\.0$/, '');
-      return `${formatted}${suffix}`;
+  let rounded = Number(scaled.toFixed(1));
+
+  if (Object.is(rounded, -0)) {
+    rounded = 0;
+  }
+
+  while (Math.abs(rounded) >= 1000 && suffixIndex < suffixes.length - 1) {
+    scaled = rounded / 1000;
+    suffixIndex += 1;
+    rounded = Number(scaled.toFixed(1));
+
+    if (Object.is(rounded, -0)) {
+      rounded = 0;
     }
   }
 
-  return String(value);
+  const formatted = Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(1).replace(/\.0$/, '');
+  return `${formatted}${suffixes[suffixIndex]}`;
 }

@@ -12,6 +12,21 @@ test('formats millions and billions with suffixes', () => {
   assert.equal(formatStatValue(3_450_000_000), '3.5b');
 });
 
+test('promotes values when rounding crosses a suffix boundary', () => {
+  assert.equal(formatStatValue(999_999), '1m');
+  assert.equal(formatStatValue(999_950_000), '1b');
+});
+
 test('leaves non-numeric values unchanged', () => {
   assert.equal(formatStatValue('1.2M'), '1.2M');
+});
+
+test('normalizes negative zero after rounding', () => {
+  assert.equal(formatStatValue(-0.0001), '0');
+});
+
+test('returns strings for non-finite values', () => {
+  assert.equal(formatStatValue(Infinity), 'Infinity');
+  assert.equal(formatStatValue(-Infinity), '-Infinity');
+  assert.equal(formatStatValue(NaN), 'NaN');
 });
