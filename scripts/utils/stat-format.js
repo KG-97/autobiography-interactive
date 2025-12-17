@@ -14,10 +14,18 @@ export function formatStatValue(value) {
 
   let rounded = Number(scaled.toFixed(1));
 
+  if (Object.is(rounded, -0)) {
+    rounded = 0;
+  }
+
   while (Math.abs(rounded) >= 1000 && suffixIndex < suffixes.length - 1) {
     scaled = rounded / 1000;
     suffixIndex += 1;
     rounded = Number(scaled.toFixed(1));
+
+    if (Object.is(rounded, -0)) {
+      rounded = 0;
+    }
   }
 
   const formatted = Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(1).replace(/\.0$/, '');

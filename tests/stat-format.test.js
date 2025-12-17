@@ -20,3 +20,13 @@ test('promotes values when rounding crosses a suffix boundary', () => {
 test('leaves non-numeric values unchanged', () => {
   assert.equal(formatStatValue('1.2M'), '1.2M');
 });
+
+test('normalizes negative zero after rounding', () => {
+  assert.equal(formatStatValue(-0.0001), '0');
+});
+
+test('returns strings for non-finite values', () => {
+  assert.equal(formatStatValue(Infinity), 'Infinity');
+  assert.equal(formatStatValue(-Infinity), '-Infinity');
+  assert.equal(formatStatValue(NaN), 'NaN');
+});
