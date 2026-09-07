@@ -10,10 +10,22 @@ not see each other's work found the same defect independently.
 
 ---
 
+## Status
+
+Both blocking findings (1 and 2) are **fixed**; everything below them is still open.
+
+The schema tests now fail on all 14 mutations that the previous suite accepted, including
+every one used to demonstrate finding 1. Note what this does and does not cover: the tests
+guard the *committed* `data/story.json` against bad edits, but the runtime code is
+unchanged — findings 21, 26, and 31 describe `scripts/main.js` still trusting its input,
+and they remain open.
+
+---
+
 ## Blocking
 
-### 1. The test suite passes against a deliberately broken `story.json`
-`tests/story.test.js:1-45`
+### 1. The test suite passes against a deliberately broken `story.json` — FIXED
+`tests/story.test.js`
 
 Nothing in the suite references `story.skills`, though `scripts/main.js:190-201` requires
 `skills[].name`, `.level`, and `.progress`. The achievements, signals, and toolkit tests
@@ -28,11 +40,13 @@ Combined with finding 3, the consequence is severe: a bad `skills` edit makes
 `renderSkills` throw, and the entire page renders as the text
 `"skills.forEach is not a function. Please refresh to try again."` — with CI green.
 
-**Fix:** assert a minimum length before each loop (the `>= 3` style at
-`tests/story.test.js:14` is already the right pattern), and add a `skills` test covering
-`Array.isArray`, non-empty, string `name`/`level`, and numeric `progress` in 0–1.
+**Fixed.** `tests/story.test.js` was rewritten to assert the contract every renderer in
+`scripts/main.js` depends on: non-empty arrays for all six sections, `skills` coverage,
+numeric stat values, integer four-digit years, 0–1 ranges for `signal.metric` and
+`skill.progress`, `Array.isArray` on `achievement.details`, unique quote-free achievement
+titles, and http(s) toolkit links. 9 tests, 15 across the suite, all passing on the real data.
 
-### 2. `engines.node: ">=18"` admits versions where `npm test` cannot run
+### 2. `engines.node: ">=18"` admits versions where `npm test` cannot run — FIXED
 `package.json:11`, `tests/story.test.js:3`
 
 `tests/story.test.js:3` uses the import-attributes syntax
@@ -52,8 +66,13 @@ Verified against real Node binaries:
 
 The declared range admits 18.0.0–18.19.x and 20.0.0–20.9.x, all of which hard-fail.
 
-**Fix:** set `"engines": {"node": ">=18.20.0 <20.0.0 || >=20.10.0"}`, or simply `">=20.10.0"`.
-Use `">=22"` if you also want JSON modules without the `ExperimentalWarning` on stderr.
+**Fixed.** `engines.node` is now `">=18.20.0 <20.0.0 || >=20.10.0"`. Verified by running the
+suite under six real Node builds and checking each against the range with npm's own semver:
+the range blocks 18.19.1 and 20.9.0 (both SyntaxError) and admits 18.20.0, 18.20.8, 20.10.0,
+and 22.22.2 (15/15 passing) — consistent on all six.
+
+Still open: JSON modules print an `ExperimentalWarning` below Node 18.20.5 / 22.12.0. Move to
+`">=22"` to silence it.
 
 ---
 

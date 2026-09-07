@@ -8,6 +8,6 @@
     "deploy": "node scripts/deploy.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.20.0 <20.0.0 || >=20.10.0"
   }
 }
