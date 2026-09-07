@@ -281,23 +281,75 @@ function setupThemeToggle() {
   prefersLight.addEventListener('change', (event) => setTheme(event.matches));
 }
 
-async function init() {
+function showStatus(message) {
+  const status = document.querySelector('.hero__status');
+  if (!status) return;
+
+  // textContent, not innerHTML: error messages can carry markup from a failed response body.
+  status.textContent = message;
+  status.hidden = false;
+}
+
+// Each section renders independently so that one malformed field degrades that
+// section alone instead of taking the whole page down with it.
+function renderSection(label, render) {
   try {
-    const data = await loadData();
-    renderHero(data.profile);
-    renderNarrative(data.profile);
-    renderSignals(data.signals);
-    renderTimeline(data.timeline, state.activeFilter);
-    renderFilters(data.timeline);
-    renderAchievements(data.achievements);
-    renderSkills(data.skills);
-    renderToolkit(data.toolkit);
-    setupPromptShuffle(data.profile.prompts);
-    setupModal(data.achievements);
-    setupThemeToggle();
+    render();
+    return true;
   } catch (error) {
-    const hero = document.querySelector('.hero__content');
-    hero.innerHTML = `<p role="alert">${error.message}. Please refresh to try again.</p>`;
+    console.error(`Failed to render the ${label} section`, error);
+    return false;
+  }
+}
+
+async function init() {
+  // Bound before the data load so the page stays usable even if the fetch fails.
+  renderSection('theme toggle', setupThemeToggle);
+
+  let data;
+  try {
+    data = await loadData();
+  } catch (error) {
+    showStatus(`${error.message}. Please refresh to try again.`);
+    return;
+  }
+
+  const sections = [
+    ['hero', () => renderHero(data.profile)],
+    [
+      'narrative',
+      () => {
+        renderNarrative(data.profile);
+        setupPromptShuffle(data.profile.prompts);
+      }
+    ],
+    ['signals', () => renderSignals(data.signals)],
+    [
+      'timeline',
+      () => {
+        renderTimeline(data.timeline, state.activeFilter);
+        renderFilters(data.timeline);
+      }
+    ],
+    [
+      'achievements',
+      () => {
+        renderAchievements(data.achievements);
+        setupModal(data.achievements);
+      }
+    ],
+    ['skills', () => renderSkills(data.skills)],
+    ['toolkit', () => renderToolkit(data.toolkit)]
+  ];
+
+  const failed = sections
+    .filter(([label, render]) => !renderSection(label, render))
+    .map(([label]) => label);
+
+  if (failed.length) {
+    showStatus(
+      `Some sections could not be displayed: ${failed.join(', ')}. The rest of this page is unaffected.`
+    );
   }
 }
 
