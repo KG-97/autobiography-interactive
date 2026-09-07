@@ -12,13 +12,14 @@ not see each other's work found the same defect independently.
 
 ## Status
 
-Both blocking findings (1 and 2) are **fixed**; everything below them is still open.
+Findings 1, 2, 3, and 30 are **fixed**; everything else is still open.
 
 The schema tests now fail on all 14 mutations that the previous suite accepted, including
 every one used to demonstrate finding 1. Note what this does and does not cover: the tests
 guard the *committed* `data/story.json` against bad edits, but the runtime code is
 unchanged — findings 21, 26, and 31 describe `scripts/main.js` still trusting its input,
-and they remain open.
+and they remain open. What finding 3's fix changes is the blast radius: bad input now
+costs one section instead of the page.
 
 ---
 
@@ -78,7 +79,7 @@ Still open: JSON modules print an `ExperimentalWarning` below Node 18.20.5 / 22.
 
 ## High
 
-### 3. One bad field anywhere blanks the entire page
+### 3. One bad field anywhere blanks the entire page — FIXED
 `scripts/main.js:284-301` — *corroborated*
 
 `init()` wraps all eleven render and setup calls in a single `try`, and the `catch`
@@ -87,9 +88,22 @@ replaces `.hero__content` wholesale via `innerHTML`. Any single failure — a mi
 the other six sections empty, and deletes the theme toggle from the DOM, so nothing on the
 page is interactive.
 
-**Fix:** call `setupThemeToggle()` before `loadData()`, wrap each section's render
-independently so one bad section degrades alone, and render the error into a dedicated
-element rather than over the hero.
+**Fixed.** `setupThemeToggle()` now runs before `loadData()`; the seven sections render
+through a `renderSection` helper that catches per section and logs to the console; and the
+message goes to a dedicated `.hero__status` live region (`role="alert"`, hidden until
+needed) via `textContent` instead of overwriting `.hero__content`.
+
+Verified in headless Chromium against the previous commit, breaking one field
+(`skills` set to a string):
+
+| | stats | timeline | achievements | skills | toolkit | toggle | message |
+|---|---|---|---|---|---|---|---|
+| before | 0 | 5 | 3 | 0 | 0 | destroyed | none |
+| after | 4 | 5 | 3 | 0 | 3 | intact | names the failed section |
+
+With `story.json` missing entirely, both versions show the same fetch error, but the theme
+toggle now survives instead of being deleted. On good data all sections render and
+`.hero__status` stays hidden.
 
 ### 4. The deploy manifest omits both modules `main.js` imports
 `scripts/deploy.js:25`
@@ -226,7 +240,7 @@ opened. (The `aria-label="Close"` at `index.html:127` names the button, not the 
 | 27 | `scripts/main.js:103-104` *(corroborated)* | When `filter === 'all'`, `filtered` is the same reference as `state.data.timeline`, so `.sort()` mutates the loaded data in place — the authored order is unrecoverable. Sort a copy |
 | 28 | `scripts/utils/stat-format.js:6` *(corroborated)* | The suffix table stops at `b`, so `1e12` renders as `"1000b"` and `1e15` as `"1000000b"`. Add a `t` suffix or fall back to `Intl.NumberFormat` compact notation |
 | 29 | `scripts/utils/stat-format.js:26-28, 31` | Dead code: the second loop only runs when `\|rounded\| >= 1000`, so `scaled` always has `\|scaled\| >= 1` and can never round to `-0`; likewise `.replace(/\.0$/, '')` can never fire because a non-integer `rounded` always has a nonzero tenths digit. Both advertise guarded paths that no input reaches |
-| 30 | `scripts/main.js:300` | The failure path interpolates `error.message` into `innerHTML`; a JSON parse error carrying an HTML fragment is injected as live markup. Use `textContent` |
+| 30 | `scripts/main.js:300` | **FIXED** as part of finding 3 — the failure path interpolated `error.message` into `innerHTML`; `showStatus` now uses `textContent` |
 | 31 | `scripts/main.js:139-146` | A timeline entry with `category: "all"` adds a second `[data-filter="all"]` chip, so both mark active and that category can never be selected alone |
 | 32 | `package.json` | No `"private": true` on a package with no `main` and no `files`, so an accidental `npm publish` pushes personal content to the public registry |
 | 33 | `README.md:21, 33` | Claims `npm test` "validates the story data structure" (it never touches `profile.stats`, `summary`, `tagline`, `skills`, or `mediaColor`), and advertises toolkit entries as downloadable resources while all three `link` values in `data/story.json` are `https://example.com/...` placeholders rendered as live anchors |
@@ -274,9 +288,10 @@ All 12 files were reviewed; no file was skipped and no reviewer failed to report
 `scripts/utils/shuffle.js` · `scripts/utils/stat-format.js` · `tests/story.test.js` ·
 `tests/stat-format.test.js` · `data/story.json` · `package.json` · `.gitignore` · `README.md`
 
-**Not covered**, and worth a follow-up: no cross-browser or real-device testing was
-performed (all rendering findings are derived from source, not from a browser); there is no
-CI workflow in the repository (`.github/` is absent), so none of the above is currently
+**Not covered**, and worth a follow-up: the contrast, ARIA, and layout findings are derived
+from source rather than from a browser or a screen reader, and no cross-browser or
+real-device testing was done. Headless Chromium was used only to verify finding 3's fix.
+There is no CI workflow in the repository (`.github/` is absent), so none of the above is
 enforced on push.
 
 **Baseline:** `npm test` on Node 22.22.2 → 11 tests, 11 pass, 0 fail, ~160ms.
