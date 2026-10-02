@@ -12,9 +12,9 @@ not see each other's work found the same defect independently.
 
 ## Status
 
-Finding 2 and finding 30 are **fixed**. Findings 1 and 3 are **partially fixed**: each
-closed its original failure, and the re-audit below shows what each still misses.
-Everything else is open.
+Findings 2 and 30 are **fixed**. Finding 1 is **fixed except R10**: the test suite now catches
+the attacks the re-audit found and accepts the valid data it wrongly rejected, but nothing
+renders the page yet. Finding 3 is **partially fixed** (R1–R3). Everything else is open.
 
 ---
 
@@ -65,19 +65,41 @@ Each fix below was verified on this branch.
 - **The status box sat off-centre.** It rendered 51px left of the hero's centre line. It now uses
   `margin: 0 auto`.
 
-### New findings (open)
+### Fixed after the re-audit: the test suite (R4–R9)
+
+`tests/story.test.js` now applies each rule only where `scripts/main.js` needs it:
+
+- Strings that reach `innerHTML` may not contain tag openers or HTML character references. Prose such as "R&D", "AT&T" and "<10 users" is still allowed.
+- Strings written into attributes may not contain quotes.
+- Links are parsed with `URL`. They must be http(s) with a host, `mailto:`, or a relative path.
+- `mediaColor` must be a gradient or `url(...)`, because the page uses it as a background image.
+
+Rules that rejected data the page renders correctly were relaxed. Stat values may be strings, `stats` may be empty, `tags` may be `null`, years may be digit strings, and `mailto:`, relative and uppercase-scheme links are accepted. `tests/stat-format.test.js` gained tests for negative scaling, rounding below 1000, and output beyond the billions range.
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Attacks the re-audit found, plus the original 14 mutations (all must be rejected) | **25 of 25 rejected** |
+| Valid data the old suite wrongly rejected, plus prose edge cases (all must be accepted) | **15 of 15 accepted** |
+| Formatter mutations that every old test missed, including removing every `Math.abs` | **3 of 3 now caught** |
+| Suite on the real data | 18/18 passing; `data/story.json` restored byte-identical after every run |
+
+R10 is still open: nothing renders the page. A rendering test needs a DOM library such as jsdom, which would be the project's first dependency.
+
+### New findings
 
 | # | Severity | Location | Defect | Consequence |
 |---|---|---|---|---|
 | R1 | medium | `scripts/main.js` `init` sections — *corroborated* | Each section renders its content, then attaches its handlers, inside one `renderSection` call | A section that fails part-way leaves half its content on the page with dead controls. With a `null` second achievement, the first card renders but `setupModal` is skipped, so its button does nothing. With one bad timeline entry, earlier entries render but no filter chips appear |
 | R2 | medium | `scripts/main.js` modal and filter handlers | Errors thrown in click handlers bypass `renderSection` | With `details` as a string, "Explore story" throws an uncaught error and nothing is shown to the user (compare finding 7) |
 | R3 | medium | `scripts/main.js` narrative section | A malformed `profile.focus` throws before the prompt renders | The prompt stays empty and Shuffle is dead, even though `prompts` is valid |
-| R4 | **high** | `tests/story.test.js` toolkit link check | `/^https?:\/\/\S+$/` accepts `"`, and accepts `https:///` with no host | `https://example.com/"onclick="alert(1)` passes every test and renders as a live `onclick` attribute |
-| R5 | **high** | `tests/story.test.js` title-key check | The check bans `"` but not HTML entities, which `innerHTML` decodes | `A &amp; B` and `A & B` both pass the uniqueness check, and clicking the first card opens the second card's details |
-| R6 | medium | `tests/story.test.js` `assertText` | Text fields may contain markup, and every one of them reaches `innerHTML` | A stat label of `<img src=x onerror=…>` passes and executes; `<!--` in a description deletes the progress bar after it |
-| R7 | medium | `tests/story.test.js` `mediaColor` | Any non-empty string is accepted | A plain colour such as `#6366f1`, the natural value for a field named "Color", passes but renders blank media because it is not a valid `background-image`; a quote also breaks out of the `style` attribute |
-| R8 | medium | `tests/story.test.js` | Over-strict: valid data that renders correctly is rejected | The stat test demands a number, though the formatter and its own test accept `'1.2M'`, so the two test files contradict each other. Also rejected: `mailto:` links, relative paths, an uppercase `HTTPS`, `tags: null`, a string year `"2025"`, and an empty `stats` array |
-| R9 | medium | `tests/stat-format.test.js` | The formatter is barely pinned by tests | 4 mutations, including removing every `Math.abs`, were caught by 0 tests; `-1500` regresses to `-1500` with the suite green |
+| R4 (fixed) | **high** | `tests/story.test.js` toolkit link check | `/^https?:\/\/\S+$/` accepts `"`, and accepts `https:///` with no host | `https://example.com/"onclick="alert(1)` passes every test and renders as a live `onclick` attribute |
+| R5 (fixed) | **high** | `tests/story.test.js` title-key check | The check bans `"` but not HTML entities, which `innerHTML` decodes | `A &amp; B` and `A & B` both pass the uniqueness check, and clicking the first card opens the second card's details |
+| R6 (fixed) | medium | `tests/story.test.js` `assertText` | Text fields may contain markup, and every one of them reaches `innerHTML` | A stat label of `<img src=x onerror=…>` passes and executes; `<!--` in a description deletes the progress bar after it |
+| R7 (fixed) | medium | `tests/story.test.js` `mediaColor` | Any non-empty string is accepted | A plain colour such as `#6366f1`, the natural value for a field named "Color", passes but renders blank media because it is not a valid `background-image`; a quote also breaks out of the `style` attribute |
+| R8 (fixed) | medium | `tests/story.test.js` | Over-strict: valid data that renders correctly is rejected | The stat test demands a number, though the formatter and its own test accept `'1.2M'`, so the two test files contradict each other. Also rejected: `mailto:` links, relative paths, an uppercase `HTTPS`, `tags: null`, a string year `"2025"`, and an empty `stats` array |
+| R9 (fixed) | medium | `tests/stat-format.test.js` | The formatter is barely pinned by tests | 4 mutations, including removing every `Math.abs`, were caught by 0 tests; `-1500` regresses to `-1500` with the suite green |
 | R10 | medium | `tests/` | No test renders the page | Every defect in R4–R7 was found only by rendering under a DOM; the suite cannot see any of them |
 | R11 | medium | `scripts/deploy.js` | Nothing is validated before shipping | A `story.json` of `{broken` builds with exit 0 and "Deployment bundle created" |
 | R12 | **high** | `styles/main.css` `.chip--active` — escalates finding 15 | The first pass measured the dark theme only | In the light theme the active filter label is **1.81–3.01:1**, close to unreadable (re-measured) |
@@ -108,7 +130,7 @@ clean, with `data/story.json` restored byte-identical after every mutation run.
 
 ## Blocking
 
-### 1. The test suite passes against a deliberately broken `story.json` — PARTIALLY FIXED (see R4–R10)
+### 1. The test suite passes against a deliberately broken `story.json` — FIXED except R10
 `tests/story.test.js`
 
 Nothing in the suite references `story.skills`, though `scripts/main.js:190-201` requires
