@@ -17,7 +17,7 @@ async function settle() {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-async function renderPage(storyData, { fetchStatus = 200 } = {}) {
+async function renderPage(storyData, { fetchStatus = 200, matchMedia = true } = {}) {
   const dom = new JSDOM(indexHtml, { url: 'http://localhost/' });
   const { window } = dom;
   // jsdom fires its own DOMContentLoaded asynchronously; let it pass before main.js
@@ -34,7 +34,7 @@ async function renderPage(storyData, { fetchStatus = 200 } = {}) {
   window.HTMLDialogElement.prototype.close = function close() {
     this.removeAttribute('open');
   };
-  window.matchMedia = () => ({ matches: false, addEventListener() {} });
+  window.matchMedia = matchMedia ? () => ({ matches: false, addEventListener() {} }) : undefined;
 
   globalThis.window = window;
   globalThis.document = window.document;
@@ -53,6 +53,58 @@ async function renderPage(storyData, { fetchStatus = 200 } = {}) {
 }
 
 const texts = (doc, selector) => [...doc.querySelectorAll(selector)].map((node) => node.textContent);
+
+// jsdom applies no layout, so visibility here means "not inside a [hidden] element".
+// Chromium was used separately to confirm the stylesheet really hides [hidden] elements.
+const visible = (element) => Boolean(element) && !element.closest('[hidden]');
+
+// Clicks every control a visitor can see and fails on any that does nothing.
+function assertNoDeadControls(doc, data) {
+  const modal = doc.querySelector('.modal');
+  for (const button of doc.querySelectorAll('.achievement__cta')) {
+    if (!visible(button)) continue;
+    button.click();
+    assert.ok(modal.hasAttribute('open'), `"Explore story" for "${button.dataset.achievement}" opens the modal`);
+    doc.querySelector('.modal__close').click();
+  }
+
+  const controls = doc.querySelector('.timeline__controls');
+  if (visible(controls)) {
+    for (const chip of controls.querySelectorAll('.chip')) {
+      chip.click();
+      assert.equal(chip.getAttribute('aria-pressed'), 'true', `the "${chip.dataset.filter}" filter responds`);
+    }
+  }
+
+  const shuffle = doc.querySelector('.narrative__shuffle');
+  if (visible(shuffle)) {
+    shuffle.click();
+    const prompt = doc.querySelector('.narrative__prompt').textContent;
+    assert.ok((data?.profile?.prompts ?? []).includes(prompt), `"Shuffle prompt" shows a prompt, got "${prompt}"`);
+  }
+
+  const toggle = doc.querySelector('.theme-toggle');
+  if (visible(toggle)) {
+    const wasLight = doc.documentElement.classList.contains('light');
+    toggle.click();
+    assert.notEqual(doc.documentElement.classList.contains('light'), wasLight, 'the theme toggle switches theme');
+  }
+}
+
+// A section shows either everything or nothing, never a fragment of its list.
+function assertWholeOrEmpty(doc, data) {
+  for (const [selector, list] of [
+    ['.stat', data.profile?.stats],
+    ['.signal', data.signals],
+    ['.timeline__item', data.timeline],
+    ['.achievement', data.achievements],
+    ['.skill', data.skills],
+    ['.tool', data.toolkit]
+  ]) {
+    const count = doc.querySelectorAll(selector).length;
+    assert.ok(count === 0 || count === list?.length, `${selector}: ${count} of ${list?.length} rendered`);
+  }
+}
 
 test('renders every section of story.json', async () => {
   const doc = await renderPage(story);
@@ -157,19 +209,63 @@ test('data that is not an object is reported as malformed', async () => {
   assert.match(doc.querySelector('.hero__status').textContent, /empty or malformed/);
 });
 
-test(
-  'a section that fails part-way leaves no dead controls',
-  { todo: 'audit finding R1: the first card renders but setupModal never runs, so its button is dead' },
-  async (t) => {
-    t.mock.method(console, 'error', () => {});
-    const broken = structuredClone(story);
-    broken.achievements[1] = null;
-    const doc = await renderPage(broken);
+test('every control works on the real data', async () => {
+  const doc = await renderPage(story);
+  assertNoDeadControls(doc, story);
+});
 
-    for (const button of doc.querySelectorAll('.achievement__cta')) {
-      button.click();
-      assert.ok(doc.querySelector('.modal').hasAttribute('open'), 'every rendered button opens the modal');
-      doc.querySelector('.modal__close').click();
-    }
-  }
-);
+// Each case breaks data part-way through a section, past the point where the old
+// renderers had already put content or controls on the page (audit findings R1 and R3).
+const partialFailures = [
+  ['an achievement that is null', 'achievements', (data) => { data.achievements[1] = null; }],
+  ['a timeline entry that is null', 'timeline', (data) => { data.timeline[2] = null; }],
+  ['timeline tags that are not a list', 'timeline', (data) => { data.timeline[4].tags = 'immersive'; }],
+  ['a stat that is null', 'hero', (data) => { data.profile.stats[2] = null; }],
+  ['a focus list that is not a list', 'narrative', (data) => { data.profile.focus = 'not a list'; }],
+  ['missing prompts', 'prompts', (data) => { delete data.profile.prompts; }]
+];
+
+for (const [name, section, breakData] of partialFailures) {
+  test(`${name}: the section fails whole and leaves no dead controls`, async (t) => {
+    t.mock.method(console, 'error', () => {});
+    const data = structuredClone(story);
+    breakData(data);
+    const doc = await renderPage(data);
+
+    assert.match(doc.querySelector('.hero__status').textContent, new RegExp(`: (.*, )?${section}(,|\\.)`));
+    assertWholeOrEmpty(doc, data);
+    assertNoDeadControls(doc, data);
+  });
+}
+
+test('a broken focus list does not take the prompt down with it', async (t) => {
+  t.mock.method(console, 'error', () => {});
+  const data = structuredClone(story);
+  data.profile.focus = 'not a list';
+  const doc = await renderPage(data);
+
+  assert.ok(story.profile.prompts.includes(doc.querySelector('.narrative__prompt').textContent), 'a prompt is shown');
+  assert.ok(visible(doc.querySelector('.narrative__shuffle')), 'the shuffle button is still offered');
+});
+
+test('a theme toggle that cannot be set up is hidden rather than left inert', async (t) => {
+  t.mock.method(console, 'error', () => {});
+  const doc = await renderPage(story, { matchMedia: false });
+
+  assert.ok(!visible(doc.querySelector('.theme-toggle')));
+  assert.equal(doc.querySelectorAll('.achievement').length, story.achievements.length, 'the rest of the page renders');
+  assertNoDeadControls(doc, story);
+});
+
+test('an error when opening a story is reported, not silent', async (t) => {
+  // Bypasses the data tests on purpose: the page must still not fail silently (audit finding R2).
+  t.mock.method(console, 'error', () => {});
+  const data = structuredClone(story);
+  data.achievements[0].details = 'not a list';
+  const doc = await renderPage(data);
+
+  doc.querySelector('.achievement__cta').click();
+  const status = doc.querySelector('.hero__status');
+  assert.equal(status.hidden, false);
+  assert.match(status.textContent, /Could not open that story/);
+});

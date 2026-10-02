@@ -12,7 +12,7 @@ not see each other's work found the same defect independently.
 
 ## Status
 
-Findings 1, 2 and 30 are **fixed**. Finding 3 is **partially fixed** (R1–R3). Everything else is open.
+Findings 1, 2, 3 and 30 are **fixed**, as are R1–R10 and R19. Everything else is open.
 
 ---
 
@@ -103,13 +103,35 @@ The full suite passes 25 tests with 1 todo on Node 18.20.0, 18.20.8, 20.10.0 and
 
 The todo test encodes R1, which is still open: a section that fails part-way leaves dead controls. node:test marks it todo, so it fails without failing the suite. It will pass once R1 is fixed.
 
+### Fixed after the re-audit: dead controls (R1–R3, R19)
+
+When a section failed part-way, its controls could stay on screen with nothing behind them. The fix applies one rule: **a section either renders completely, or leaves no controls behind.**
+
+- **Sections render all or nothing.** Every renderer builds its content off-page and swaps it in only when it is complete, so a failure part-way leaves nothing on the page. The modal is bound before the achievement cards are rendered.
+- **Controls in the markup are hidden on failure.** These controls are part of `index.html`, so they would otherwise survive a failure: the "All" chip and timeline controls, the prompt card with its Shuffle button, and the theme toggle.
+- **Prompts are their own section (R3).** A broken focus list no longer takes the prompt and Shuffle with it.
+- **Click failures are reported (R2).** Click handlers report an error through the status message instead of failing silently.
+- **A CSS fix makes `hidden` work.** `.timeline__controls` sets `display: flex`, which overrode `hidden`, so a global `[hidden] { display: none !important }` rule was needed. jsdom applies no CSS, so it could not see this; it was checked in real Chromium.
+
+**Verification:**
+
+| Check | Result |
+|---|---|
+| Render tests now cover six part-way failures (null achievement, null timeline entry, non-list tags, null stat, non-list focus, missing prompts). Each asserts the section rendered whole or not at all, and clicks every visible control | all pass |
+| The 9 new tests run against the pre-fix `main.js` | **9 of 9 fail** |
+| Each of the 7 parts of the fix reverted separately | **7 of 7 caught**, each by its own test |
+| Real Chromium: computed `display` of the timeline controls and prompt card with broken data | `none` with the fix; still `flex` and `grid` (visible) without the CSS rule |
+| Good data, in jsdom and Chromium | renders exactly as before; no status shown |
+
+Still open: finding 7. A click on a story whose `details` is not a list is now reported rather than silent, but the modal still does not open. The data tests reject that value, so it can only occur if they are bypassed.
+
 ### New findings
 
 | # | Severity | Location | Defect | Consequence |
 |---|---|---|---|---|
-| R1 | medium | `scripts/main.js` `init` sections — *corroborated* | Each section renders its content, then attaches its handlers, inside one `renderSection` call | A section that fails part-way leaves half its content on the page with dead controls. With a `null` second achievement, the first card renders but `setupModal` is skipped, so its button does nothing. With one bad timeline entry, earlier entries render but no filter chips appear |
-| R2 | medium | `scripts/main.js` modal and filter handlers | Errors thrown in click handlers bypass `renderSection` | With `details` as a string, "Explore story" throws an uncaught error and nothing is shown to the user (compare finding 7) |
-| R3 | medium | `scripts/main.js` narrative section | A malformed `profile.focus` throws before the prompt renders | The prompt stays empty and Shuffle is dead, even though `prompts` is valid |
+| R1 (fixed) | medium | `scripts/main.js` `init` sections — *corroborated* | Each section renders its content, then attaches its handlers, inside one `renderSection` call | A section that fails part-way leaves half its content on the page with dead controls. With a `null` second achievement, the first card renders but `setupModal` is skipped, so its button does nothing. With one bad timeline entry, earlier entries render but no filter chips appear |
+| R2 (fixed) | medium | `scripts/main.js` modal and filter handlers | Errors thrown in click handlers bypass `renderSection` | With `details` as a string, "Explore story" throws an uncaught error and nothing is shown to the user (compare finding 7) |
+| R3 (fixed) | medium | `scripts/main.js` narrative section | A malformed `profile.focus` throws before the prompt renders | The prompt stays empty and Shuffle is dead, even though `prompts` is valid |
 | R4 (fixed) | **high** | `tests/story.test.js` toolkit link check | `/^https?:\/\/\S+$/` accepts `"`, and accepts `https:///` with no host | `https://example.com/"onclick="alert(1)` passes every test and renders as a live `onclick` attribute |
 | R5 (fixed) | **high** | `tests/story.test.js` title-key check | The check bans `"` but not HTML entities, which `innerHTML` decodes | `A &amp; B` and `A & B` both pass the uniqueness check, and clicking the first card opens the second card's details |
 | R6 (fixed) | medium | `tests/story.test.js` `assertText` | Text fields may contain markup, and every one of them reaches `innerHTML` | A stat label of `<img src=x onerror=…>` passes and executes; `<!--` in a description deletes the progress bar after it |
@@ -125,7 +147,7 @@ The todo test encodes R1, which is still open: a section that fails part-way lea
 | R16 | low | `styles/main.css` buttons | No `font: inherit` anywhere | `<button>`s render in the system font at 13.33px, smaller than the `<a>` CTAs beside them (confirmed: no reset in the stylesheet) |
 | R17 | low | `styles/main.css` `.hero__badge`, `.footer a` | Light-theme contrast | The badge measures 4.33:1 (re-measured); the footer link is 4.94:1 on plain background but drops below 4.5:1 over the body gradient |
 | R18 | low | `scripts/main.js` cards and tool links | Every card button says "Explore story" and every tool link says "Open" | Screen-reader users hear identical names, and the new tab is not announced |
-| R19 | low | `scripts/main.js` `init` | The return value of the theme-toggle `renderSection` is ignored | If the toggle fails to set up, nobody is told |
+| R19 (fixed) | low | `scripts/main.js` `init` | The return value of the theme-toggle `renderSection` is ignored | If the toggle fails to set up, nobody is told |
 | R20 | low | `package.json` | `engines` is not enforced | Without `engine-strict`, an unsupported Node produces a confusing SyntaxError rather than a clear version error |
 
 ### Re-confirmed independently
@@ -202,7 +224,7 @@ Still open: JSON modules print an `ExperimentalWarning` below Node 18.20.5 / 22.
 
 ## High
 
-### 3. One bad field anywhere blanks the entire page — PARTIALLY FIXED (see R1–R3)
+### 3. One bad field anywhere blanks the entire page — FIXED (R1–R3 closed after the re-audit)
 `scripts/main.js:284-301` — *corroborated*
 
 `init()` wraps all eleven render and setup calls in a single `try`, and the `catch`
