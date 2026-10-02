@@ -14,11 +14,17 @@ This project is a static site that loads narrative content from `data/story.json
 
 ### Install dependencies
 
-No dependencies are required beyond the Node runtime. If you would like to add packages, update `package.json` as needed.
+The site itself has no runtime dependencies. The test suite uses one development dependency, [jsdom](https://github.com/jsdom/jsdom), to render the page outside a browser. Install it once before running the tests:
+
+```
+npm install
+```
+
+jsdom is pinned to version 26 because version 27 drops support for Node 18.20 and for 20.10 through 20.18.
 
 ### Available scripts
 
-- `npm test` – Validates the story data structure using the Node test runner.
+- `npm test` – Runs the Node test runner over three suites. The data tests check that `data/story.json` holds values the page can render safely. The formatter tests cover number abbreviation. The render tests load `index.html` with `scripts/main.js` in jsdom and check what a visitor gets: every section renders, text displays as text, each "Explore story" button opens its own story, filters work, and failures are contained and reported.
 - `npm run deploy` – Builds a `dist/` directory containing a ready-to-ship bundle and deployment manifest for static hosting or Railway uploads.
 
 ### Deploying

@@ -12,9 +12,7 @@ not see each other's work found the same defect independently.
 
 ## Status
 
-Findings 2 and 30 are **fixed**. Finding 1 is **fixed except R10**: the test suite now catches
-the attacks the re-audit found and accepts the valid data it wrongly rejected, but nothing
-renders the page yet. Finding 3 is **partially fixed** (R1–R3). Everything else is open.
+Findings 1, 2 and 30 are **fixed**. Finding 3 is **partially fixed** (R1–R3). Everything else is open.
 
 ---
 
@@ -85,7 +83,25 @@ Verification:
 | Formatter mutations that every old test missed, including removing every `Math.abs` | **3 of 3 now caught** |
 | Suite on the real data | 18/18 passing; `data/story.json` restored byte-identical after every run |
 
-R10 is still open: nothing renders the page. A rendering test needs a DOM library such as jsdom, which would be the project's first dependency.
+### Fixed after the re-audit: a test that renders the page (R10)
+
+`tests/render.test.js` loads `index.html` with `scripts/main.js` in jsdom and checks what a visitor would get:
+
+- every section renders from `story.json`;
+- text displays as text, never as markup or decoded entities;
+- each "Explore story" button opens its own achievement;
+- each filter shows only its own entries and updates `aria-pressed`;
+- a malformed section fails alone and is reported;
+- a failed fetch keeps the theme toggle;
+- data that is not an object is reported as malformed.
+
+jsdom implements neither `<dialog>` modality, `matchMedia` nor `fetch`, so the test supplies minimal stand-ins for all three. jsdom is a dev dependency pinned to `^26.1.0`, because jsdom 27 requires Node `^20.19 || ^22.12` and would silently exclude versions this repository supports.
+
+To check that the test catches real bugs, nine regressions were deliberately introduced into `main.js`. They include the modal opening the wrong story, inverted filters, unreported failures, and both of the original findings 3 and 30. The render test caught **9 of 9**; the data tests caught **0 of 9**.
+
+The full suite passes 25 tests with 1 todo on Node 18.20.0, 18.20.8, 20.10.0 and 22.22.2, and still fails on 18.19.1, 19.9.0 and 20.9.0. The `engines` range agrees with all seven builds.
+
+The todo test encodes R1, which is still open: a section that fails part-way leaves dead controls. node:test marks it todo, so it fails without failing the suite. It will pass once R1 is fixed.
 
 ### New findings
 
@@ -100,7 +116,7 @@ R10 is still open: nothing renders the page. A rendering test needs a DOM librar
 | R7 (fixed) | medium | `tests/story.test.js` `mediaColor` | Any non-empty string is accepted | A plain colour such as `#6366f1`, the natural value for a field named "Color", passes but renders blank media because it is not a valid `background-image`; a quote also breaks out of the `style` attribute |
 | R8 (fixed) | medium | `tests/story.test.js` | Over-strict: valid data that renders correctly is rejected | The stat test demands a number, though the formatter and its own test accept `'1.2M'`, so the two test files contradict each other. Also rejected: `mailto:` links, relative paths, an uppercase `HTTPS`, `tags: null`, a string year `"2025"`, and an empty `stats` array |
 | R9 (fixed) | medium | `tests/stat-format.test.js` | The formatter is barely pinned by tests | 4 mutations, including removing every `Math.abs`, were caught by 0 tests; `-1500` regresses to `-1500` with the suite green |
-| R10 | medium | `tests/` | No test renders the page | Every defect in R4–R7 was found only by rendering under a DOM; the suite cannot see any of them |
+| R10 (fixed) | medium | `tests/` | No test renders the page | Every defect in R4–R7 was found only by rendering under a DOM; the suite cannot see any of them |
 | R11 | medium | `scripts/deploy.js` | Nothing is validated before shipping | A `story.json` of `{broken` builds with exit 0 and "Deployment bundle created" |
 | R12 | **high** | `styles/main.css` `.chip--active` — escalates finding 15 | The first pass measured the dark theme only | In the light theme the active filter label is **1.81–3.01:1**, close to unreadable (re-measured) |
 | R13 | low | `scripts/main.js` `loadData` | No timeout and no loading state | A stalled fetch leaves the page blank with no message |
@@ -130,7 +146,7 @@ clean, with `data/story.json` restored byte-identical after every mutation run.
 
 ## Blocking
 
-### 1. The test suite passes against a deliberately broken `story.json` — FIXED except R10
+### 1. The test suite passes against a deliberately broken `story.json` — FIXED
 `tests/story.test.js`
 
 Nothing in the suite references `story.skills`, though `scripts/main.js:190-201` requires
