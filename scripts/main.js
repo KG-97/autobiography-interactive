@@ -314,6 +314,11 @@ async function init() {
     return;
   }
 
+  if (!data || typeof data !== 'object') {
+    showStatus('Story data is empty or malformed. Please refresh to try again.');
+    return;
+  }
+
   const sections = [
     ['hero', () => renderHero(data.profile)],
     [
@@ -346,10 +351,11 @@ async function init() {
     .filter(([label, render]) => !renderSection(label, render))
     .map(([label]) => label);
 
-  if (failed.length) {
-    showStatus(
-      `Some sections could not be displayed: ${failed.join(', ')}. The rest of this page is unaffected.`
-    );
+  if (failed.length === sections.length) {
+    showStatus('None of the story sections could be displayed. Please refresh to try again.');
+  } else if (failed.length) {
+    // "Fully": a section can fail part-way and leave some of its content on the page.
+    showStatus(`Some sections could not be fully displayed: ${failed.join(', ')}.`);
   }
 }
 

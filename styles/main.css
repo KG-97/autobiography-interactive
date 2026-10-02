@@ -138,7 +138,7 @@ a {
 }
 
 .hero__status {
-  margin: 0 0 1.25rem;
+  margin: 0 auto 1.25rem;
   padding: 0.75rem 1rem;
   max-width: 52ch;
   border: 1px solid var(--border);

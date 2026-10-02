@@ -12,20 +12,103 @@ not see each other's work found the same defect independently.
 
 ## Status
 
-Findings 1, 2, 3, and 30 are **fixed**; everything else is still open.
+Finding 2 and finding 30 are **fixed**. Findings 1 and 3 are **partially fixed**: each
+closed its original failure, and the re-audit below shows what each still misses.
+Everything else is open.
 
-The schema tests now fail on all 14 mutations that the previous suite accepted, including
-every one used to demonstrate finding 1. Note what this does and does not cover: the tests
-guard the *committed* `data/story.json` against bad edits, but the runtime code is
-unchanged — findings 21, 26, and 31 describe `scripts/main.js` still trusting its input,
-and they remain open. What finding 3's fix changes is the blast radius: bad input now
-costs one section instead of the page.
+---
+
+## Re-audit — 2026-10-02
+
+A second full pass over the branch head. Five independent reviewers ran it, and none of them
+was shown this file. Four repeated the original slices (app logic, markup and CSS, data and
+tests, build and deploy). The fifth reviewed the PR #8 diff on its own and tested every claim in
+its commit messages. This section lists only what changed. Findings that were re-discovered
+independently are recorded at the end of the section.
+
+### Corrections to this document
+
+Several claims made in the first pass were wrong. They are corrected here rather than quietly edited away.
+
+- **Finding 2's fix admitted a whole failing major version.** `>=18.20.0 <20.0.0` contains
+  every Node 19.x release. Node 19.9.0 fails the suite with `SyntaxError: Unexpected token 'with'`.
+  The original verification tested six builds and none of them was a 19.x. The range is now
+  corrected; see "Fixed in this pass".
+- **Finding 2 said the range "blocks" failing versions. That was overstated.** npm does not
+  enforce `engines` on `npm test` or `npm run` unless `engine-strict` is set, so the range
+  documents the requirement accurately but prevents nothing.
+- **Finding 3's "before" row said the old code showed no message. That was false.** The old
+  `catch` printed the error as `<p role="alert">…` in place of the hero. The browser probe
+  only searched for `.hero__status`, an element the old markup does not have. The table in
+  finding 3 is corrected.
+- **Finding 3 said a malformed field "costs that section alone". That was overstated.** See R1–R3.
+- **Finding 1 said the tests "assert the contract every renderer depends on". That was
+  overstated.** The 14 original mutations are all caught, but a 37-mutation re-run caught only 23,
+  and the suite also rejects data that renders correctly. See R4–R10.
+
+### Fixed in this pass
+
+Each fix below was verified on this branch.
+
+- **The Node 19.x hole.** `engines.node` is now `">=18.20.0 <19.0.0 || >=20.10.0"`. Seven real
+  Node builds were run, each checked against the range with npm's own semver, and all seven agree:
+  18.19.1, 19.9.0 and 20.9.0 fail the suite and are excluded; 18.20.0, 18.20.8, 20.10.0 and
+  22.22.2 pass 15/15 and are admitted.
+- **README drift that the first fix introduced.** The README's "Node.js 18 or newer" contradicted
+  `engines` and pointed readers at versions that fail. It now states the real range.
+- **A misleading status message.** The message said "The rest of this page is unaffected" even when
+  every section had failed. A `story.json` containing `null` produced a seven-section failure list
+  over a blank page. Now non-object data is reported as malformed, a total failure is reported as
+  one, and a partial failure says the section "could not be fully displayed". All four cases
+  (good data, one bad section, `null`, `{}`) were verified in headless Chromium, and the theme
+  toggle survived every one.
+- **The status box sat off-centre.** It rendered 51px left of the hero's centre line. It now uses
+  `margin: 0 auto`.
+
+### New findings (open)
+
+| # | Severity | Location | Defect | Consequence |
+|---|---|---|---|---|
+| R1 | medium | `scripts/main.js` `init` sections — *corroborated* | Each section renders its content, then attaches its handlers, inside one `renderSection` call | A section that fails part-way leaves half its content on the page with dead controls. With a `null` second achievement, the first card renders but `setupModal` is skipped, so its button does nothing. With one bad timeline entry, earlier entries render but no filter chips appear |
+| R2 | medium | `scripts/main.js` modal and filter handlers | Errors thrown in click handlers bypass `renderSection` | With `details` as a string, "Explore story" throws an uncaught error and nothing is shown to the user (compare finding 7) |
+| R3 | medium | `scripts/main.js` narrative section | A malformed `profile.focus` throws before the prompt renders | The prompt stays empty and Shuffle is dead, even though `prompts` is valid |
+| R4 | **high** | `tests/story.test.js` toolkit link check | `/^https?:\/\/\S+$/` accepts `"`, and accepts `https:///` with no host | `https://example.com/"onclick="alert(1)` passes every test and renders as a live `onclick` attribute |
+| R5 | **high** | `tests/story.test.js` title-key check | The check bans `"` but not HTML entities, which `innerHTML` decodes | `A &amp; B` and `A & B` both pass the uniqueness check, and clicking the first card opens the second card's details |
+| R6 | medium | `tests/story.test.js` `assertText` | Text fields may contain markup, and every one of them reaches `innerHTML` | A stat label of `<img src=x onerror=…>` passes and executes; `<!--` in a description deletes the progress bar after it |
+| R7 | medium | `tests/story.test.js` `mediaColor` | Any non-empty string is accepted | A plain colour such as `#6366f1`, the natural value for a field named "Color", passes but renders blank media because it is not a valid `background-image`; a quote also breaks out of the `style` attribute |
+| R8 | medium | `tests/story.test.js` | Over-strict: valid data that renders correctly is rejected | The stat test demands a number, though the formatter and its own test accept `'1.2M'`, so the two test files contradict each other. Also rejected: `mailto:` links, relative paths, an uppercase `HTTPS`, `tags: null`, a string year `"2025"`, and an empty `stats` array |
+| R9 | medium | `tests/stat-format.test.js` | The formatter is barely pinned by tests | 4 mutations, including removing every `Math.abs`, were caught by 0 tests; `-1500` regresses to `-1500` with the suite green |
+| R10 | medium | `tests/` | No test renders the page | Every defect in R4–R7 was found only by rendering under a DOM; the suite cannot see any of them |
+| R11 | medium | `scripts/deploy.js` | Nothing is validated before shipping | A `story.json` of `{broken` builds with exit 0 and "Deployment bundle created" |
+| R12 | **high** | `styles/main.css` `.chip--active` — escalates finding 15 | The first pass measured the dark theme only | In the light theme the active filter label is **1.81–3.01:1**, close to unreadable (re-measured) |
+| R13 | low | `scripts/main.js` `loadData` | No timeout and no loading state | A stalled fetch leaves the page blank with no message |
+| R14 | low | `scripts/deploy.js` | Symlinks are copied as-is | A link that points outside the repo ships into `dist/` |
+| R15 | low | `index.html` `<h1>` | The only `h1` is empty until the data loads | When the fetch fails, screen-reader users land on a blank top-level heading |
+| R16 | low | `styles/main.css` buttons | No `font: inherit` anywhere | `<button>`s render in the system font at 13.33px, smaller than the `<a>` CTAs beside them (confirmed: no reset in the stylesheet) |
+| R17 | low | `styles/main.css` `.hero__badge`, `.footer a` | Light-theme contrast | The badge measures 4.33:1 (re-measured); the footer link is 4.94:1 on plain background but drops below 4.5:1 over the body gradient |
+| R18 | low | `scripts/main.js` cards and tool links | Every card button says "Explore story" and every tool link says "Open" | Screen-reader users hear identical names, and the new tab is not announced |
+| R19 | low | `scripts/main.js` `init` | The return value of the theme-toggle `renderSection` is ignored | If the toggle fails to set up, nobody is told |
+| R20 | low | `package.json` | `engines` is not enforced | Without `engine-strict`, an unsupported Node produces a confusing SyntaxError rather than a clear version error |
+
+### Re-confirmed independently
+
+These were re-found by reviewers who had not seen this file: 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16,
+17, 19, 21, 22, 23, 24, 26, 27, 28, 31, 32, 33 and 35. Finding 5 was strengthened: a stray `.env`
+placed in `scripts/` ships into `dist/`. Findings 18, 20, 25, 29 and 34 were not re-found in this
+pass. They stand on their first-pass verification.
+
+### Coverage
+
+All 12 files were covered by five reviewers, and every reviewer reported. Phase 2 verification was done by
+recomputation and reproduction rather than by more agents. Each high-severity claim above was
+reproduced, measured, or found by two reviewers independently. The repository was left
+clean, with `data/story.json` restored byte-identical after every mutation run.
 
 ---
 
 ## Blocking
 
-### 1. The test suite passes against a deliberately broken `story.json` — FIXED
+### 1. The test suite passes against a deliberately broken `story.json` — PARTIALLY FIXED (see R4–R10)
 `tests/story.test.js`
 
 Nothing in the suite references `story.skills`, though `scripts/main.js:190-201` requires
@@ -67,10 +150,12 @@ Verified against real Node binaries:
 
 The declared range admits 18.0.0–18.19.x and 20.0.0–20.9.x, all of which hard-fail.
 
-**Fixed.** `engines.node` is now `">=18.20.0 <20.0.0 || >=20.10.0"`. Verified by running the
-suite under six real Node builds and checking each against the range with npm's own semver:
-the range blocks 18.19.1 and 20.9.0 (both SyntaxError) and admits 18.20.0, 18.20.8, 20.10.0,
-and 22.22.2 (15/15 passing) — consistent on all six.
+**Fixed.** `engines.node` is now `">=18.20.0 <19.0.0 || >=20.10.0"`. The first fix used `<20.0.0`,
+which admitted Node 19.x; see the re-audit's corrections. Verified across seven real Node builds,
+each checked against the range with npm's own semver. The range excludes 18.19.1, 19.9.0 and 20.9.0,
+which all fail with a SyntaxError, and admits 18.20.0, 18.20.8, 20.10.0 and 22.22.2, which pass 15/15.
+All seven agree. The range documents the requirement; npm only enforces it with `engine-strict`
+(R20).
 
 Still open: JSON modules print an `ExperimentalWarning` below Node 18.20.5 / 22.12.0. Move to
 `">=22"` to silence it.
@@ -79,7 +164,7 @@ Still open: JSON modules print an `ExperimentalWarning` below Node 18.20.5 / 22.
 
 ## High
 
-### 3. One bad field anywhere blanks the entire page — FIXED
+### 3. One bad field anywhere blanks the entire page — PARTIALLY FIXED (see R1–R3)
 `scripts/main.js:284-301` — *corroborated*
 
 `init()` wraps all eleven render and setup calls in a single `try`, and the `catch`
@@ -98,8 +183,12 @@ Verified in headless Chromium against the previous commit, breaking one field
 
 | | stats | timeline | achievements | skills | toolkit | toggle | message |
 |---|---|---|---|---|---|---|---|
-| before | 0 | 5 | 3 | 0 | 0 | destroyed | none |
+| before | 0 | 5 | 3 | 0 | 0 | destroyed | raw error text in place of the hero |
 | after | 4 | 5 | 3 | 0 | 3 | intact | names the failed section |
+
+The "before" message column is corrected. The first version of this table said "none", which was a
+measurement error: the probe searched only for `.hero__status`, which the old markup lacks. The
+timeline and achievement counts were already intact before the change.
 
 With `story.json` missing entirely, both versions show the same fetch error, but the theme
 toggle now survives instead of being deleted. On good data all sections render and

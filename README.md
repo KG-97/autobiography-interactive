@@ -10,7 +10,7 @@ This project is a static site that loads narrative content from `data/story.json
 
 ### Requirements
 
-- Node.js 18 or newer (for the built-in test runner and deployment script)
+- Node.js 18.20+ on the 18 line, or 20.10 and newer (for the built-in test runner and deployment script). Node 19.x and 20.0–20.9 cannot parse the test suite's JSON import.
 
 ### Install dependencies
 
