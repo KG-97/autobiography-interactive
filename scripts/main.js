@@ -19,11 +19,7 @@ async function loadData() {
 }
 
 function renderHero(profile) {
-  document.querySelector('.hero__title').textContent = profile.name;
-  document.querySelector('.hero__subtitle').textContent = profile.tagline;
-
-  const stats = document.querySelector('.hero__stats');
-  stats.innerHTML = '';
+  const stats = document.createDocumentFragment();
 
   profile.stats.forEach((stat) => {
     const statElement = document.createElement('div');
@@ -34,21 +30,30 @@ function renderHero(profile) {
     `;
     stats.appendChild(statElement);
   });
+
+  document.querySelector('.hero__title').textContent = profile.name;
+  document.querySelector('.hero__subtitle').textContent = profile.tagline;
+  document.querySelector('.hero__stats').replaceChildren(stats);
 }
 
 function renderNarrative(profile) {
-  document.querySelector('.narrative__summary').textContent = profile.summary;
-
-  const focusList = document.querySelector('.narrative__focus');
-  focusList.innerHTML = '';
+  const focus = document.createDocumentFragment();
   profile.focus.forEach((item) => {
     const li = document.createElement('li');
     li.textContent = item;
-    focusList.appendChild(li);
+    focus.appendChild(li);
   });
 
+  document.querySelector('.narrative__summary').textContent = profile.summary;
+  document.querySelector('.narrative__focus').replaceChildren(focus);
+}
+
+// Kept apart from the summary and focus list, so a problem in either of those cannot
+// leave the prompt empty and the shuffle button doing nothing.
+function renderPrompts(prompts) {
   state.currentPromptIndex = 0;
-  updatePrompt(profile.prompts);
+  updatePrompt(prompts);
+  setupPromptShuffle(prompts);
 }
 
 function updatePrompt(prompts) {
@@ -58,8 +63,7 @@ function updatePrompt(prompts) {
 }
 
 function renderSignals(signals) {
-  const container = document.querySelector('.signals');
-  container.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   signals.forEach((signal) => {
     const article = document.createElement('article');
@@ -80,13 +84,15 @@ function renderSignals(signals) {
       </div>
     `;
 
-    container.appendChild(article);
+    fragment.appendChild(article);
   });
+
+  document.querySelector('.signals').replaceChildren(fragment);
 }
 
 function renderTimeline(timeline, filter = 'all') {
   const container = document.querySelector('.timeline');
-  container.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   const filtered =
     filter === 'all'
@@ -96,7 +102,7 @@ function renderTimeline(timeline, filter = 'all') {
   if (!filtered.length) {
     const empty = document.createElement('p');
     empty.textContent = 'No entries for this chapter yet. Check back soon!';
-    container.appendChild(empty);
+    container.replaceChildren(empty);
     return;
   }
 
@@ -105,12 +111,18 @@ function renderTimeline(timeline, filter = 'all') {
     .forEach((item) => {
       const article = document.createElement('article');
       article.className = 'timeline__item';
-      article.dataset.year = item.year;
       article.innerHTML = `
         <span class="timeline__category">${item.category}</span>
         <h3 class="timeline__title">${item.title}</h3>
         <p class="timeline__description">${item.description}</p>
       `;
+
+      // Set with textContent rather than interpolated into the markup above, so the year
+      // adds no new innerHTML input (audit finding 8).
+      const year = document.createElement('time');
+      year.className = 'timeline__year';
+      year.textContent = item.year;
+      article.prepend(year);
 
       const tags = document.createElement('ul');
       tags.className = 'timeline__tags';
@@ -122,8 +134,10 @@ function renderTimeline(timeline, filter = 'all') {
       });
 
       article.appendChild(tags);
-      container.appendChild(article);
+      fragment.appendChild(article);
     });
+
+  container.replaceChildren(fragment);
 }
 
 function renderFilters(timeline) {
@@ -135,6 +149,7 @@ function renderFilters(timeline) {
   }
 
   const categories = Array.from(new Set(timeline.map((item) => item.category)));
+  const chips = document.createDocumentFragment();
 
   categories.forEach((category) => {
     const button = document.createElement('button');
@@ -142,10 +157,10 @@ function renderFilters(timeline) {
     button.dataset.filter = category;
     button.textContent = category;
     button.setAttribute('aria-pressed', 'false');
-    controls.appendChild(button);
+    chips.appendChild(button);
   });
 
-  controls.addEventListener('click', (event) => {
+  controls.addEventListener('click', guarded('filter the timeline', (event) => {
     if (!(event.target instanceof HTMLButtonElement)) return;
 
     const { filter } = event.target.dataset;
@@ -160,12 +175,12 @@ function renderFilters(timeline) {
       });
 
     renderTimeline(state.data.timeline, filter);
-  });
+  }));
+  controls.appendChild(chips);
 }
 
 function renderAchievements(achievements) {
-  const container = document.querySelector('.achievements');
-  container.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   achievements.forEach((achievement) => {
     const card = document.createElement('article');
@@ -179,13 +194,14 @@ function renderAchievements(achievements) {
       </div>
     `;
 
-    container.appendChild(card);
+    fragment.appendChild(card);
   });
+
+  document.querySelector('.achievements').replaceChildren(fragment);
 }
 
 function renderSkills(skills) {
-  const container = document.querySelector('.skills');
-  container.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   skills.forEach((skill) => {
     const skillElement = document.createElement('article');
@@ -200,13 +216,14 @@ function renderSkills(skills) {
       </div>
     `;
 
-    container.appendChild(skillElement);
+    fragment.appendChild(skillElement);
   });
+
+  document.querySelector('.skills').replaceChildren(fragment);
 }
 
 function renderToolkit(toolkit) {
-  const container = document.querySelector('.toolkit');
-  container.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
   toolkit.forEach((item) => {
     const card = document.createElement('article');
@@ -219,17 +236,19 @@ function renderToolkit(toolkit) {
       <a class="tool__link" href="${item.link}" target="_blank" rel="noreferrer">Open</a>
     `;
 
-    container.appendChild(card);
+    fragment.appendChild(card);
   });
+
+  document.querySelector('.toolkit').replaceChildren(fragment);
 }
 
 function setupPromptShuffle(prompts) {
   const button = document.querySelector('.narrative__shuffle');
-  button.addEventListener('click', () => {
+  button.addEventListener('click', guarded('shuffle the prompt', () => {
     const order = shuffle([...prompts]);
     state.currentPromptIndex = (state.currentPromptIndex + 1) % order.length;
     document.querySelector('.narrative__prompt').textContent = order[state.currentPromptIndex];
-  });
+  }));
 }
 
 function setupModal(achievements) {
@@ -237,7 +256,7 @@ function setupModal(achievements) {
   const closeButton = modal.querySelector('.modal__close');
   const content = modal.querySelector('.modal__content');
 
-  document.body.addEventListener('click', (event) => {
+  document.body.addEventListener('click', guarded('open that story', (event) => {
     const target = event.target;
     if (!(target instanceof HTMLButtonElement)) return;
 
@@ -252,7 +271,7 @@ function setupModal(achievements) {
       `;
       modal.showModal();
     }
-  });
+  }));
 
   closeButton.addEventListener('click', () => modal.close());
   modal.addEventListener('cancel', (event) => {
@@ -273,31 +292,115 @@ function setupThemeToggle() {
 
   setTheme(prefersLight.matches);
 
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', guarded('switch the theme', () => {
     const isLight = root.classList.toggle('light');
     toggle.setAttribute('aria-pressed', String(isLight));
-  });
+  }));
 
   prefersLight.addEventListener('change', (event) => setTheme(event.matches));
 }
 
-async function init() {
+function showStatus(message) {
+  const status = document.querySelector('.hero__status');
+  if (!status) return;
+
+  // textContent, not innerHTML: error messages can carry markup from a failed response body.
+  status.textContent = message;
+  status.hidden = false;
+}
+
+function hide(selector) {
+  const element = document.querySelector(selector);
+  if (element) element.hidden = true;
+}
+
+// Event handlers run after init() has finished, outside renderSection, so a failure in
+// one would otherwise be silent and leave its control looking broken. Report it instead.
+function guarded(action, handler) {
+  return (event) => {
+    try {
+      handler(event);
+    } catch (error) {
+      console.error(`Failed to ${action}`, error);
+      showStatus(`Could not ${action}. Please refresh to try again.`);
+    }
+  };
+}
+
+// Each section renders independently so that one malformed field degrades that
+// section alone instead of taking the whole page down with it.
+function renderSection(label, render) {
   try {
-    const data = await loadData();
-    renderHero(data.profile);
-    renderNarrative(data.profile);
-    renderSignals(data.signals);
-    renderTimeline(data.timeline, state.activeFilter);
-    renderFilters(data.timeline);
-    renderAchievements(data.achievements);
-    renderSkills(data.skills);
-    renderToolkit(data.toolkit);
-    setupPromptShuffle(data.profile.prompts);
-    setupModal(data.achievements);
-    setupThemeToggle();
+    render();
+    return true;
   } catch (error) {
-    const hero = document.querySelector('.hero__content');
-    hero.innerHTML = `<p role="alert">${error.message}. Please refresh to try again.</p>`;
+    console.error(`Failed to render the ${label} section`, error);
+    return false;
+  }
+}
+
+async function init() {
+  // Bound before the data load so the page stays usable even if the fetch fails. If it
+  // cannot be set up, hide it rather than leave a button that does nothing.
+  if (!renderSection('theme toggle', setupThemeToggle)) {
+    hide('.theme-toggle');
+  }
+
+  let data;
+  try {
+    data = await loadData();
+  } catch (error) {
+    showStatus(`${error.message}. Please refresh to try again.`);
+    return;
+  }
+
+  if (!data || typeof data !== 'object') {
+    showStatus('Story data is empty or malformed. Please refresh to try again.');
+    return;
+  }
+
+  // Each renderer builds its content off-page and swaps it in only once complete, so a
+  // failed section shows nothing rather than half its content. Controls that are part of
+  // the markup itself would survive a failure with nothing behind them, so the third
+  // entry names the ones to hide when that happens.
+  const sections = [
+    ['hero', () => renderHero(data.profile)],
+    ['narrative', () => renderNarrative(data.profile)],
+    ['prompts', () => renderPrompts(data.profile.prompts), '.narrative__card--prompt'],
+    ['signals', () => renderSignals(data.signals)],
+    [
+      'timeline',
+      () => {
+        renderTimeline(data.timeline, state.activeFilter);
+        renderFilters(data.timeline);
+      },
+      '.timeline__controls'
+    ],
+    [
+      'achievements',
+      () => {
+        // Bound first: if the cards then fail, none are shown, so no button is left inert.
+        setupModal(data.achievements);
+        renderAchievements(data.achievements);
+      }
+    ],
+    ['skills', () => renderSkills(data.skills)],
+    ['toolkit', () => renderToolkit(data.toolkit)]
+  ];
+
+  const failed = [];
+  for (const [label, render, controls] of sections) {
+    if (!renderSection(label, render)) {
+      failed.push(label);
+      if (controls) hide(controls);
+    }
+  }
+
+  if (failed.length === sections.length) {
+    showStatus('None of the story sections could be displayed. Please refresh to try again.');
+  } else if (failed.length) {
+    // "Fully": a section can fail part-way and leave some of its content on the page.
+    showStatus(`Some sections could not be fully displayed: ${failed.join(', ')}.`);
   }
 }
 
