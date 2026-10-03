@@ -12,7 +12,7 @@ not see each other's work found the same defect independently.
 
 ## Status
 
-Findings 1, 2, 3 and 30 are **fixed**, as are R1–R10 and R19. Everything else is open.
+Findings 1, 2, 3, 9, 10, 15 and 30 are **fixed**, as are R1–R10, R12 and R19, so no high-severity finding remains open. Everything else is open.
 
 ---
 
@@ -125,6 +125,23 @@ When a section failed part-way, its controls could stay on screen with nothing b
 
 Still open: finding 7. A click on a story whose `details` is not a list is now reported rather than silent, but the modal still does not open. The data tests reject that value, so it can only occur if they are bypassed.
 
+### Fixed after the re-audit: high-severity contrast (9, 10, R12)
+
+- **Buttons and the selected filter (9, R12, and 15).** A new `--on-accent` token sets the colour of text on an accent background: dark (`#0f172a`) in the dark theme, white in the light theme. `.button` and the selected-chip rule both use it. The selected-chip rule also covers hover and focus, and it now uses the themed, opaque accent gradient in place of the fixed translucent light-blue one. The accent colours themselves are unchanged, because darkening the dark-theme accent would have broken every place `--accent` is used as text on a dark background.
+- **Timeline years (10).** Each entry now renders its year as a real `<time class="timeline__year">`, set with `textContent`, so it adds no new `innerHTML` input. The CSS-generated watermark was removed: it was the year's only display, at 8% opacity, and keeping it next to the real year would have made screen readers announce the year twice. The render test now checks that every entry shows its year.
+
+Measured from the colours real Chromium computes, before and after:
+
+| | Before, dark theme | After, dark theme | Before, light theme | After, light theme |
+|---|---|---|---|---|
+| `.button` text | 2.14–2.77:1 | **8.33–6.44:1** | 5.17–6.70:1 | 5.17–6.70:1 (unchanged) |
+| Selected filter chip (also hover and focus) | 3.43–4.63:1 | **8.33–6.44:1** | 1.81–3.01:1 | **5.17–6.70:1** |
+| Timeline year | not displayed (about 1.1:1 watermark) | **8.33:1**, 28px bold | not displayed | **5.10:1**, 28px bold |
+
+The "before" figures match the audit's own measurements, so the method is calibrated. The chip was measured with CSS transitions disabled. Headless Chromium's simulated clock does not advance transitions, so a theme switch left the chip's animated text colour stuck on the previous theme's value. A real browser completes the 220ms transition. Screenshots of both themes were checked by eye. Tests: 35/35.
+
+Still open: finding 14, where a hovered filter chip looks identical to the selected one. It is now legible in both states, but the states remain indistinguishable.
+
 ### New findings
 
 | # | Severity | Location | Defect | Consequence |
@@ -140,7 +157,7 @@ Still open: finding 7. A click on a story whose `details` is not a list is now r
 | R9 (fixed) | medium | `tests/stat-format.test.js` | The formatter is barely pinned by tests | 4 mutations, including removing every `Math.abs`, were caught by 0 tests; `-1500` regresses to `-1500` with the suite green |
 | R10 (fixed) | medium | `tests/` | No test renders the page | Every defect in R4–R7 was found only by rendering under a DOM; the suite cannot see any of them |
 | R11 | medium | `scripts/deploy.js` | Nothing is validated before shipping | A `story.json` of `{broken` builds with exit 0 and "Deployment bundle created" |
-| R12 | **high** | `styles/main.css` `.chip--active` — escalates finding 15 | The first pass measured the dark theme only | In the light theme the active filter label is **1.81–3.01:1**, close to unreadable (re-measured) |
+| R12 (fixed) | **high** | `styles/main.css` `.chip--active` — escalates finding 15 | The first pass measured the dark theme only | In the light theme the active filter label is **1.81–3.01:1**, close to unreadable (re-measured) |
 | R13 | low | `scripts/main.js` `loadData` | No timeout and no loading state | A stalled fetch leaves the page blank with no message |
 | R14 | low | `scripts/deploy.js` | Symlinks are copied as-is | A link that points outside the repo ships into `dist/` |
 | R15 | low | `index.html` `<h1>` | The only `h1` is empty until the data loads | When the fetch fails, screen-reader users land on a blank top-level heading |
@@ -316,7 +333,7 @@ functional bug: an achievement title containing a double quote breaks out of
 **Fix:** build these nodes with `createElement` + `textContent` (as `renderNarrative`
 already does for focus items). Key modals on an explicit unique `id`, not the title.
 
-### 9. Primary buttons fail contrast in the dark theme
+### 9. Primary buttons fail contrast in the dark theme — FIXED
 `styles/main.css:215`
 
 `.button` sets `color: white` over `linear-gradient(135deg, var(--accent), var(--accent-strong))`.
@@ -328,7 +345,7 @@ WCAG ratios are **2.1:1 and 2.8:1** against a 4.5:1 requirement. This affects ev
 **Fix:** use a dark foreground such as `#0f172a` on the accent gradient, or darken the
 dark-theme accent tokens to at least `#0369a1`.
 
-### 10. Timeline years are invisible to everyone
+### 10. Timeline years are invisible to everyone — FIXED
 `scripts/main.js:108`, `styles/main.css:411-419`
 
 The year is written only to `data-year` and surfaced solely through
@@ -367,7 +384,7 @@ opened. (The `aria-label="Close"` at `index.html:127` names the button, not the 
 |---|---|---|---|
 | 13 | `scripts/main.js:281` *(corroborated)* | The `prefers-color-scheme` listener calls `setTheme` unconditionally, discarding a manual toggle; the choice is never persisted | A user who picks dark is silently flipped back to light when their OS auto-switches at sunset |
 | 14 | `styles/main.css:387-389` | `.chip--active` is grouped with `.chip:hover` and `.chip:focus-visible` in one rule | While the pointer rests on any chip, the user cannot tell which timeline filter is applied |
-| 15 | `styles/main.css:390` | Active-chip white text over the translucent gradient composites to 3.4:1 at the first stop and 4.6:1 at the second | The selected filter's label fails AA across most of its width |
+| 15 (fixed, see R12) | `styles/main.css:390` | Active-chip white text over the translucent gradient composites to 3.4:1 at the first stop and 4.6:1 at the second | The selected filter's label fails AA across most of its width |
 | 16 | `styles/main.css:451` | `.timeline__tag` renders `--accent` at 12.8px on a pale tint — 4.2:1 in the light theme | Tag labels miss AA small-text contrast in light mode (dark theme is 6.6:1 and passes) |
 | 17 | `styles/main.css:77` | Hero blobs run `animation: float 16s infinite` and the stylesheet contains no `prefers-reduced-motion` query anywhere (grep-confirmed) | Users with vestibular sensitivity face continuously drifting shapes with no way to stop them |
 | 18 | `index.html:86` | `role="toolbar"` with no roving tabindex and no arrow-key handler in `scripts/main.js:129-164` | Keyboard users press the arrow keys the role promises and nothing happens |

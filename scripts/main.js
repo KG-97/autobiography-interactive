@@ -111,12 +111,18 @@ function renderTimeline(timeline, filter = 'all') {
     .forEach((item) => {
       const article = document.createElement('article');
       article.className = 'timeline__item';
-      article.dataset.year = item.year;
       article.innerHTML = `
         <span class="timeline__category">${item.category}</span>
         <h3 class="timeline__title">${item.title}</h3>
         <p class="timeline__description">${item.description}</p>
       `;
+
+      // Set with textContent rather than interpolated into the markup above, so the year
+      // adds no new innerHTML input (audit finding 8).
+      const year = document.createElement('time');
+      year.className = 'timeline__year';
+      year.textContent = item.year;
+      article.prepend(year);
 
       const tags = document.createElement('ul');
       tags.className = 'timeline__tags';

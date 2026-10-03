@@ -7,6 +7,9 @@
   --text-muted: #94a3b8;
   --accent: #38bdf8;
   --accent-strong: #0ea5e9;
+  /* Text on an --accent/--accent-strong background. The dark theme's accents are light,
+     so white text on them falls below 3:1; dark text reaches over 7:1. */
+  --on-accent: #0f172a;
   --border: rgba(148, 163, 184, 0.25);
   --shadow: 0 20px 45px rgba(15, 23, 42, 0.45);
   --radius: 18px;
@@ -23,6 +26,7 @@
   --text-muted: #475569;
   --accent: #2563eb;
   --accent-strong: #1d4ed8;
+  --on-accent: #ffffff;
   --border: rgba(15, 23, 42, 0.12);
   --shadow: 0 15px 35px rgba(15, 23, 42, 0.12);
 }
@@ -232,7 +236,7 @@ a {
   border-radius: 999px;
   border: 1px solid transparent;
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  color: white;
+  color: var(--on-accent);
   font-weight: 600;
   text-decoration: none;
   transition: transform var(--transition), box-shadow var(--transition),
@@ -406,8 +410,10 @@ a {
 .chip--active,
 .chip:hover,
 .chip:focus-visible {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.75), rgba(59, 130, 246, 0.85));
-  color: white;
+  /* Themed and opaque: the old fixed, translucent light-blue gradient put white text at
+     1.8-3.0:1 in the light theme. */
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: var(--on-accent);
   transform: translateY(-1px);
 }
 
@@ -427,14 +433,14 @@ a {
   overflow: hidden;
 }
 
-.timeline__item::before {
-  content: attr(data-year);
-  position: absolute;
-  inset: 1.5rem auto auto 1.75rem;
-  font-size: 3.5rem;
+/* The year used to exist only as CSS-generated text at 8% opacity (about 1.1:1), so no one
+   could read it. It is now real text in the markup. */
+.timeline__year {
+  font-size: 1.75rem;
   font-weight: 700;
-  color: rgba(148, 163, 184, 0.08);
-  pointer-events: none;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--accent);
 }
 
 .timeline__title {

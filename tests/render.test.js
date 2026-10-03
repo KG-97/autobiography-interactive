@@ -133,6 +133,7 @@ test('renders story text as text, not as markup', async () => {
   assert.deepEqual(texts(doc, '.stat__value'), story.profile.stats.map((stat) => formatStatValue(stat.value)));
   assert.deepEqual(texts(doc, '.signal__title'), story.signals.map((signal) => signal.title));
   assert.deepEqual(texts(doc, '.signal__description'), story.signals.map((signal) => signal.description));
+  assert.deepEqual(texts(doc, '.timeline__year'), byYear.map((entry) => String(entry.year)), 'each entry shows its year as text');
   assert.deepEqual(texts(doc, '.timeline__title'), byYear.map((entry) => entry.title));
   assert.deepEqual(texts(doc, '.timeline__description'), byYear.map((entry) => entry.description));
   assert.deepEqual(texts(doc, '.achievement__title'), story.achievements.map((achievement) => achievement.title));
